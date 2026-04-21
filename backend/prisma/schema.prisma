@@ -1,0 +1,304 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  firstName    String
+  lastName     String
+  email        String   @unique
+  passwordHash String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  userRoles       UserRole[]
+  refreshTokens   RefreshToken[]
+  auditLogs       AuditLog[]
+  notifications   Notification[]
+  files           File[]
+  skinProfile     SkinProfile?
+  userConcerns    UserConcern[]
+  allergies       Allergy[]
+  skinAssessments SkinAssessment[]
+  routines        Routine[]
+  progressLogs    ProgressLog[]
+  productInteractions ProductInteraction[]
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+}
+
+model UserRole {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  roleId     Int
+  assignedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+}
+
+model Permission {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  id           Int @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+}
+
+model RefreshToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  action    String
+  entity    String
+  entityId  Int?
+  oldValue  String?
+  newValue  String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Setting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model File {
+  id         Int      @id @default(autoincrement())
+  entity     String
+  entityId   Int
+  filename   String
+  filePath   String
+  fileSize   Int
+  uploadedBy Int
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [uploadedBy], references: [id])
+}
+
+model Brand {
+  id          Int      @id @default(autoincrement())
+  name        String
+  country     String?
+  website     String?
+  description String?
+  createdAt   DateTime @default(now())
+
+  products Product[]
+}
+
+model ProductCategory {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  icon        String?
+
+  products Product[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  brandId     Int
+  categoryId  Int
+  description String?
+  price Float?
+  routineStep String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand              Brand              @relation(fields: [brandId], references: [id])
+  category           ProductCategory    @relation(fields: [categoryId], references: [id])
+  productIngredients ProductIngredient[]
+  productConcerns    ProductConcern[]
+  routineSteps       RoutineStep[]
+  productInteractions ProductInteraction[]
+}
+
+model Ingredient {
+  id           Int     @id @default(autoincrement())
+  name         String
+  function     String?
+  safetyRating Int?
+  description  String?
+
+  productIngredients ProductIngredient[]
+  allergies          Allergy[]
+}
+
+model ProductIngredient {
+  id            Int     @id @default(autoincrement())
+  productId     Int
+  ingredientId  Int
+  concentration String?
+
+  product    Product    @relation(fields: [productId], references: [id])
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+}
+
+model SkinProfile {
+  id          Int     @id @default(autoincrement())
+  userId      Int     @unique
+  age         Int?
+  skinType    String?
+  skinTone       String?
+  hydration   Int?
+  oilLevel    Int?
+  sensitivity Int?
+  climate     String?
+  diet           String?
+  hormonalStatus String?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model SkinConcern {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String?
+  severity    Int?
+
+  userConcerns    UserConcern[]
+  productConcerns ProductConcern[]
+}
+
+model UserConcern {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  concernId Int
+  severity  Float?
+  notedAt   DateTime @default(now())
+
+  user    User        @relation(fields: [userId], references: [id])
+  concern SkinConcern @relation(fields: [concernId], references: [id])
+}
+
+model ProductConcern {
+  id            Int  @id @default(autoincrement())
+  productId     Int
+  concernId     Int
+  effectiveness Int?
+
+  product Product     @relation(fields: [productId], references: [id])
+  concern SkinConcern @relation(fields: [concernId], references: [id])
+}
+
+model Allergy {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  ingredientId Int
+  severity     Int?
+  notedAt      DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id])
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+}
+
+model SkinAssessment {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  sleepHours  Int?
+  waterIntake Int?
+  stressLevel Int?
+  assessedAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Routine {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  type        String
+  name        String
+  generatedAt DateTime @default(now())
+  isActive    Boolean  @default(true)
+
+  user         User          @relation(fields: [userId], references: [id])
+  routineSteps RoutineStep[]
+  progressLogs ProgressLog[]
+}
+
+model RoutineStep {
+  id           Int     @id @default(autoincrement())
+  routineId    Int
+  productId    Int
+  stepOrder    Int
+  timeOfDay    String?
+  instructions String?
+
+  routine Routine @relation(fields: [routineId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model ProgressLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  routineId Int
+  rating    Int?
+  notes     String?
+  loggedAt  DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  routine Routine @relation(fields: [routineId], references: [id])
+}
+
+model ProductInteraction {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  rating    Float
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
