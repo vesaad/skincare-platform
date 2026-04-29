@@ -10,7 +10,11 @@ app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
 
 app.use('/api/auth', require('./src/routes/auth.routes'));
-
+app.use('/images', require('express').static(require('path').join(__dirname, 'public/images')));
+app.use('/api/brands',      require('./src/routes/brand.routes'));
+app.use('/api/ingredients', require('./src/routes/ingredient.routes'));
+app.use('/api/categories',  require('./src/routes/category.routes'));
+app.use('/api/products', require('./src/routes/product.routes'));
 app.get('/api/protected', authMiddleware, (req, res) => {
   res.json({ message: 'E kalove mbrojtjen!', user: req.user });
 });
