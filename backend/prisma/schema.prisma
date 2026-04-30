@@ -154,6 +154,7 @@ model Product {
   description String?
   price Float?
   routineStep String?
+  imageUrl String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
