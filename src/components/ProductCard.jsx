@@ -1,3 +1,6 @@
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../store/slices/cartSlice";
+
 const emojis = ["🧴", "💧", "🌿", "✨", "🌸", "💜", "🍊", "💎"];
 const colors = [
   "from-purple-100 to-pink-100",
@@ -8,6 +11,10 @@ const colors = [
 ];
 
 export default function ProductCard({ product }) {
+  const dispatch = useDispatch();
+  const cartItems = useSelector((s) => s.cart.items);
+  const inCart = cartItems.some((i) => i.id === product.id);
+
   const emoji = emojis[product.id % emojis.length] || "🧴";
   const color = colors[product.id % colors.length] || colors[0];
   const match = product.matchScore
@@ -16,7 +23,6 @@ export default function ProductCard({ product }) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition group overflow-hidden">
-      {/* Image Area */}
       <div
         className={`relative bg-gradient-to-br ${color} h-36 flex items-center justify-center`}
       >
@@ -37,7 +43,6 @@ export default function ProductCard({ product }) {
         </span>
       </div>
 
-      {/* Content */}
       <div className="p-4">
         <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">
           {product.brand?.name || "Brand"}
@@ -46,7 +51,6 @@ export default function ProductCard({ product }) {
           {product.name}
         </h3>
 
-        {/* Tags */}
         <div className="flex flex-wrap gap-1 mb-3">
           {product.productIngredients?.slice(0, 2).map((pi) => (
             <span
@@ -63,11 +67,17 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between">
           <p className="font-bold text-gray-900">${product.price}</p>
-          <button className="text-xs bg-purple-500 text-white px-3 py-1.5 rounded-lg hover:bg-purple-600 transition">
-            + Shto
+          <button
+            onClick={() => dispatch(addToCart(product))}
+            className={`text-xs px-3 py-1.5 rounded-lg transition ${
+              inCart
+                ? "bg-green-500 text-white"
+                : "bg-purple-500 text-white hover:bg-purple-600"
+            }`}
+          >
+            {inCart ? "✓ Shtuar" : "+ Shto"}
           </button>
         </div>
       </div>
