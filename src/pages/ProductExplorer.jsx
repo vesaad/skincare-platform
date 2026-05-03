@@ -15,24 +15,27 @@ export default function ProductExplorer() {
     "Serum",
     "Moisturizer",
     "Cleanser",
-    "SPF / Krem dielli",
+    "Sunscreen",
     "Toner",
     "Eye Cream",
   ];
   const skinTypes = ["Yndyrore", "E thatë", "Mikse", "Normale", "E ndjeshme"];
   const brands = [
-    "The Ordinary",
-    "CeraVe",
-    "La Roche-Posay",
-    "Neutrogena",
-    "Paula's Choice",
+    "LuxuryGlow",
+    "DermaCare",
+    "ClinicalSkin",
+    "InfluenceX",
+    "BudgetBeauty",
   ];
 
   useEffect(() => {
     const fetchProducts = async () => {
       dispatch(setLoading(true));
       try {
-        const params = { page, limit: 12, q: search, ...filters };
+        const params = { page, limit: 12, q: search };
+        if (filters.category) params.category = filters.category;
+        if (filters.skinType) params.skinType = filters.skinType;
+        if (filters.brand) params.brand = filters.brand;
         const res = await api.get("/products/search", { params });
         dispatch(setProducts(res.data));
       } catch {
@@ -44,7 +47,15 @@ export default function ProductExplorer() {
   }, [page, search, filters]);
 
   const toggleFilter = (key, value) => {
-    setFilters((f) => ({ ...f, [key]: f[key] === value ? "" : value }));
+    setFilters((f) => {
+      const current = { ...f };
+      if (current[key] === value) {
+        delete current[key];
+      } else {
+        current[key] = value;
+      }
+      return current;
+    });
     setPage(1);
   };
 
@@ -56,7 +67,6 @@ export default function ProductExplorer() {
           Filtrat
         </p>
 
-        {/* Kategoria */}
         <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
           Kategoria
         </p>
@@ -74,7 +84,6 @@ export default function ProductExplorer() {
           ))}
         </div>
 
-        {/* Lloji i lëkurës */}
         <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
           Lloji i lëkurës
         </p>
@@ -92,7 +101,6 @@ export default function ProductExplorer() {
           ))}
         </div>
 
-        {/* Marka */}
         <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
           Marka
         </p>
@@ -113,7 +121,6 @@ export default function ProductExplorer() {
 
       {/* Main Content */}
       <div className="flex-1 p-8">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="relative flex-1 max-w-xl">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -134,7 +141,6 @@ export default function ProductExplorer() {
           </p>
         </div>
 
-        {/* Active Filters */}
         {Object.values(filters).some((v) => v) && (
           <div className="flex gap-2 mb-4 flex-wrap">
             {Object.entries(filters).map(([k, v]) =>
@@ -151,7 +157,6 @@ export default function ProductExplorer() {
           </div>
         )}
 
-        {/* Grid */}
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-purple-400 text-lg">Duke u ngarkuar...</div>
@@ -164,7 +169,6 @@ export default function ProductExplorer() {
           </div>
         )}
 
-        {/* Pagination */}
         <div className="flex gap-2 mt-8 justify-center items-center">
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}

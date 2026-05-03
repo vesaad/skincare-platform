@@ -20,7 +20,18 @@ export default function ProductCard({ product }) {
       <div
         className={`relative bg-gradient-to-br ${color} h-36 flex items-center justify-center`}
       >
-        <span className="text-5xl">{emoji}</span>
+        {product.imageUrl ? (
+          <img
+            src={`http://localhost:3001/images/${product.imageUrl}`}
+            alt={product.name}
+            className="h-full w-full object-cover"
+            onError={(e) => {
+              e.target.style.display = "none";
+            }}
+          />
+        ) : (
+          <span className="text-5xl">{emoji}</span>
+        )}
         <span className="absolute top-2 right-2 bg-white text-purple-600 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
           {match}% match
         </span>
