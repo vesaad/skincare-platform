@@ -50,7 +50,7 @@ const getImageUrl = async (category, productId) => {
   try {
     if (!fs.existsSync(IMAGE_DIR)) fs.mkdirSync(IMAGE_DIR, { recursive: true });
     const localPath = path.join(IMAGE_DIR, `product_${productId}.jpg`);
-    const publicUrl = `/images/product_${productId}.jpg`;
+    const publicUrl = `product_${productId}.jpg`;
     if (fs.existsSync(localPath)) return publicUrl;
     const query = `${category} skincare product`;
     const res = await fetch(
