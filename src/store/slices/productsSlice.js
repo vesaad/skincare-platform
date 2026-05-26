@@ -5,8 +5,13 @@ const productsSlice = createSlice({
   initialState: { list: [], total: 0, loading: false, filters: {} },
   reducers: {
     setProducts: (state, action) => {
-      state.list = action.payload.products;
-      state.total = action.payload.total;
+      const payload = action.payload;
+      if (Array.isArray(payload)) {
+        state.list = payload;
+      } else {
+        state.list = payload?.products ?? [];
+        state.total = payload?.total ?? 0;
+      }
       state.loading = false;
     },
     setFilters: (state, action) => {

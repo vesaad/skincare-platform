@@ -37,7 +37,12 @@ export default function ProductExplorer() {
         if (filters.skinType) params.skinType = filters.skinType;
         if (filters.brand) params.brand = filters.brand;
         const res = await api.get("/products/search", { params });
-        dispatch(setProducts(res.data));
+        dispatch(
+          setProducts({
+            products: res.data.products ?? [],
+            total: res.data.total ?? 0,
+          }),
+        );
       } catch {
         dispatch(setLoading(false));
       }
