@@ -1,6 +1,3 @@
-import { useDispatch, useSelector } from "react-redux";
-import { addToCart } from "../store/slices/cartSlice";
-
 const colors = [
   "from-purple-100 to-pink-100",
   "from-blue-100 to-cyan-100",
@@ -10,10 +7,6 @@ const colors = [
 ];
 
 export default function ProductCard({ product }) {
-  const dispatch = useDispatch();
-  const cartItems = useSelector((s) => s.cart.items);
-  const inCart = cartItems.some((i) => i.id === product.id);
-
   const categoryLabel =
     typeof product.category === "string"
       ? product.category
@@ -45,7 +38,9 @@ export default function ProductCard({ product }) {
             }}
           />
         ) : (
-          <div className={`bg-gradient-to-br ${color} h-36 flex items-center justify-center`}>
+          <div
+            className={`bg-gradient-to-br ${color} h-36 flex items-center justify-center`}
+          >
             <div className="w-16 h-16 rounded-2xl bg-white/80 shadow-sm flex items-center justify-center text-2xl font-bold text-purple-600">
               {placeholderLetter}
             </div>
@@ -82,19 +77,7 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        <div className="flex items-center justify-between">
-          <p className="font-bold text-gray-900">${product.price}</p>
-          <button
-            onClick={() => dispatch(addToCart(product))}
-            className={`text-xs px-3 py-1.5 rounded-lg transition ${
-              inCart
-                ? "bg-green-500 text-white"
-                : "bg-purple-500 text-white hover:bg-purple-600"
-            }`}
-          >
-            {inCart ? "✓ Shtuar" : "+ Shto"}
-          </button>
-        </div>
+        <p className="font-bold text-gray-900">${product.price}</p>
       </div>
     </div>
   );
