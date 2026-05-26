@@ -17,7 +17,6 @@ export default function ProductExplorer() {
     "Cleanser",
     "Sunscreen",
     "Toner",
-    "Eye Cream",
   ];
   const skinTypes = ["Yndyrore", "E thatë", "Mikse", "Normale", "E ndjeshme"];
   const brands = [
