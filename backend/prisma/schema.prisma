@@ -133,8 +133,6 @@ model Brand {
   website     String?
   description String?
   createdAt   DateTime @default(now())
-
-  products Product[]
 }
 
 model ProductCategory {
@@ -142,27 +140,24 @@ model ProductCategory {
   name        String
   description String?
   icon        String?
-
-  products Product[]
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int      @id
   name        String
-  brandId     Int
-  categoryId  Int
-  description String?
-  price Float?
-  routineStep String?
-  imageUrl String?
+  brand       String
+  category    String
+  price       Float
+  skinType    String?
+  rating      Float?
+  ingredients String
+  imageUrl    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  brand              Brand              @relation(fields: [brandId], references: [id])
-  category           ProductCategory    @relation(fields: [categoryId], references: [id])
-  productIngredients ProductIngredient[]
-  productConcerns    ProductConcern[]
-  routineSteps       RoutineStep[]
+  productIngredients  ProductIngredient[]
+  productConcerns     ProductConcern[]
+  routineSteps        RoutineStep[]
   productInteractions ProductInteraction[]
 }
 

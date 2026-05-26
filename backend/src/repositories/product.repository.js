@@ -5,8 +5,6 @@ const findAll = async ({ where={}, skip=0, take=20, orderBy={name:'asc'} }) => {
   return prisma.product.findMany({
     where, skip, take, orderBy,
     include: {
-      brand:    true,
-      category: true,
       productIngredients: { include: { ingredient: true } }
     }
   });
@@ -16,8 +14,6 @@ const findById = async (id) => {
   return prisma.product.findUnique({
     where: { id: parseInt(id) },
     include: {
-      brand:    true,
-      category: true,
       productIngredients: { include: { ingredient: true } }
     }
   });
