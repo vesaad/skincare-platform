@@ -23,12 +23,12 @@ export default function ProductCard({ product }) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition group overflow-hidden">
-      <div className="relative h-36 overflow-hidden">
+      <div className="relative h-36 overflow-hidden bg-gray-50">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain p-3"
             onError={(e) => {
               e.target.onerror = null;
               e.target.parentNode.innerHTML = `
