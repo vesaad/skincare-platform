@@ -1,188 +1,132 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import api from "../services/api";
+import { setSavedRoutineId } from "../store/slices/routineSlice";
 
-const morningSteps = [
-  {
-    step: 1,
-    type: "Cleanser",
-    product: "Gentle Foaming Cleanser",
-    brand: "CeraVe",
-    match: 98,
-    emoji: "🧴",
-  },
-  {
-    step: 2,
-    type: "Serum",
-    product: "Niacinamide 10% + Zinc 1%",
-    brand: "The Ordinary",
-    match: 95,
-    emoji: "💧",
-  },
-  {
-    step: 3,
-    type: "Moisturizer",
-    product: "Hydro Boost Water Gel",
-    brand: "Neutrogena",
-    match: 91,
-    emoji: "🌿",
-  },
-  {
-    step: 4,
-    type: "Sunscreen",
-    product: "Anthelios UV Mune SPF 50+",
-    brand: "La Roche-Posay",
-    match: 88,
-    emoji: "☀️",
-  },
-];
-
-const nightSteps = [
-  {
-    step: 1,
-    type: "Cleanser",
-    product: "Gentle Cleanser",
-    brand: "CeraVe",
-    match: 96,
-    emoji: "🧴",
-  },
-  {
-    step: 2,
-    type: "Serum",
-    product: "BHA 2% Liquid Exfoliant",
-    brand: "Paula's Choice",
-    match: 89,
-    emoji: "✨",
-  },
-  {
-    step: 3,
-    type: "Moisturizer",
-    product: "Moisturizing Cream",
-    brand: "CeraVe",
-    match: 92,
-    emoji: "💜",
-  },
-];
-
-function RoutineStep({ step, type, product, brand, match, emoji }) {
+function ProductStepCard({ product }) {
   return (
-    <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-100 hover:shadow-sm transition">
-      <div className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
-        {step}
+    <div className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition">
+      <div className="flex items-start gap-4">
+        <img
+          src={`/images/products/${product.product_id}.jpg`}
+          alt={product.name}
+          className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+          onError={(e) => { e.target.style.display = 'none'; }}
+        />
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-purple-600 uppercase tracking-wider">
+            {product.step}
+          </p>
+          <h3 className="font-semibold text-gray-900 mt-1">{product.name}</h3>
+          <p className="text-sm text-gray-400">{product.brand}</p>
+          <p className="text-lg font-bold text-gray-900 mt-2">${product.price}</p>
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {(product.ingredients || []).map((ing) => (
+              <span
+                key={ing}
+                className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
+              >
+                {ing}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
-        {emoji}
-      </div>
-      <div className="flex-1">
-        <p className="text-xs text-gray-400 uppercase tracking-wider">{type}</p>
-        <p className="font-semibold text-gray-900 text-sm">{product}</p>
-        <p className="text-xs text-gray-400">{brand}</p>
-      </div>
-      <span className="bg-purple-50 text-purple-600 text-xs font-bold px-2 py-1 rounded-full">
-        {match}% match
-      </span>
     </div>
   );
 }
 
 export default function Routine() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
-      <div className="max-w-4xl mx-auto px-8 py-10">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Rutina jote personale
-          </h1>
-          <p className="text-gray-400 mt-1">
-            Bazuar në profilin tënd të lëkurës — përditësohet automatikisht
-          </p>
-        </div>
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { data, savedRoutineId } = useSelector((s) => s.routine);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState(null);
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {[
-            { label: "Saktësia e ML", value: "87%", color: "text-purple-600" },
-            { label: "Produkte", value: "7", color: "text-pink-500" },
-            { label: "Hapat", value: "4", color: "text-blue-500" },
-          ].map((s, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-xl p-4 border border-gray-100 text-center"
-            >
-              <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-              <p className="text-xs text-gray-400 mt-1">{s.label}</p>
-            </div>
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center px-6">
+        <div className="text-center max-w-md">
+          <p className="text-gray-500 mb-6">
+            No routine yet. Complete the quiz to get your personalized plan.
+          </p>
+          <Link
+            to="/quiz"
+            className="inline-block px-6 py-3 bg-gray-900 text-white rounded-2xl font-medium"
+          >
+            Take the Quiz
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await api.post("/routines", {
+        routineType: data.routine,
+        products: data.products,
+      });
+      dispatch(setSavedRoutineId(res.data.id));
+      setSaved(true);
+    } catch (err) {
+      setError(err.response?.data?.error || "Could not save routine");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#faf9f7]">
+      <div className="max-w-2xl mx-auto px-6 py-12">
+        <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-2">
+          Your personalized plan
+        </p>
+        <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
+          {data.routine.replace(" Routine", "")} Routine
+        </h1>
+        <p className="text-gray-400 mt-2">
+          Model confidence:{" "}
+          <span className="font-semibold text-gray-700">{data.confidence}%</span>
+        </p>
+
+        <div className="mt-10 flex flex-col gap-4">
+          {data.products?.map((p) => (
+            <ProductStepCard key={`${p.step}-${p.product_id}`} product={p} />
           ))}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Morning Routine */}
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">🌅</span>
-              <div>
-                <h2 className="font-bold text-gray-900">Mëngjesi</h2>
-                <p className="text-xs text-gray-400">4 hapa — ~5 minuta</p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              {morningSteps.map((s) => (
-                <RoutineStep key={s.step} {...s} />
-              ))}
-            </div>
-          </div>
+        {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
 
-          {/* Night Routine */}
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">🌙</span>
-              <div>
-                <h2 className="font-bold text-gray-900">Mbrëmja</h2>
-                <p className="text-xs text-gray-400">3 hapa — ~5 minuta</p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              {nightSteps.map((s) => (
-                <RoutineStep key={s.step} {...s} />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Progress Log */}
-        <div className="mt-6 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <h2 className="font-bold text-gray-900 mb-4">
-            📊 Regjistro progresin sot
-          </h2>
-          <div className="flex gap-4 items-center flex-wrap">
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <button
-                  key={n}
-                  className="w-10 h-10 rounded-xl border border-gray-200 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-600 transition text-sm font-medium"
-                >
-                  {n}⭐
-                </button>
-              ))}
-            </div>
-            <input
-              placeholder="Shënim (opsional)..."
-              className="flex-1 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
-            />
-            <button className="bg-gradient-to-r from-purple-500 to-pink-400 text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition">
-              Ruaj
-            </button>
-          </div>
-        </div>
-
-        {/* Link tek Quiz */}
-        <div className="mt-4 text-center">
-          <Link
-            to="/quiz"
-            className="text-purple-500 text-sm hover:text-purple-700"
+        <div className="mt-10 flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving || saved}
+            className="flex-1 py-4 bg-gray-900 text-white rounded-2xl font-semibold hover:bg-gray-800 disabled:opacity-50 transition"
           >
-            ↺ Ndrysho rutinën duke bërë quizin sërish
-          </Link>
+            {saved ? "✓ Routine Saved" : saving ? "Saving…" : "Save Routine"}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/quiz")}
+            className="flex-1 py-4 border border-gray-200 bg-white text-gray-700 rounded-2xl font-medium hover:bg-gray-50 transition"
+          >
+            Back to Quiz
+          </button>
         </div>
+
+        {saved && (
+          <p className="text-center text-sm text-gray-400 mt-4">
+            <Link to="/dashboard" className="text-purple-600 hover:underline">
+              View on Dashboard →
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );
