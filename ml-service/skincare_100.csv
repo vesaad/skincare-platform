@@ -1,0 +1,101 @@
+id,Product_ID,name,Brand,category,Price,Ingredients
+0,453,BudgetBeauty Moisturizer,BudgetBeauty,Moisturizer,96,Retinol|Hyaluronic Acid|Ceramides
+1,30,LuxuryGlow Moisturizer,LuxuryGlow,Moisturizer,140,Hyaluronic Acid
+2,240,LuxuryGlow Moisturizer,LuxuryGlow,Moisturizer,125,Ceramides
+3,366,ClinicalSkin Moisturizer,ClinicalSkin,Moisturizer,84,Ceramides|Retinol
+4,65,DermaCare Moisturizer,DermaCare,Moisturizer,121,Vitamin C
+5,255,BudgetBeauty Moisturizer,BudgetBeauty,Moisturizer,105,Ceramides|Vitamin C
+6,375,LuxuryGlow Moisturizer,LuxuryGlow,Moisturizer,115,Ceramides|Vitamin C
+7,346,LuxuryGlow Moisturizer,LuxuryGlow,Moisturizer,84,Ceramides|Retinol
+8,270,LuxuryGlow Moisturizer,LuxuryGlow,Moisturizer,142,Retinol
+9,70,DermaCare Moisturizer,DermaCare,Moisturizer,149,Retinol
+10,558,InfluenceX Moisturizer,InfluenceX,Moisturizer,141,Ceramides|Retinol
+11,200,LuxuryGlow Moisturizer,LuxuryGlow,Moisturizer,37,Retinol
+12,467,BudgetBeauty Moisturizer,BudgetBeauty,Moisturizer,99,Retinol|Ceramides|Hyaluronic Acid
+13,595,InfluenceX Moisturizer,InfluenceX,Moisturizer,94,Vitamin C
+14,119,LuxuryGlow Moisturizer,LuxuryGlow,Moisturizer,57,Retinol|Ceramides|Vitamin C
+15,0,LuxuryGlow Moisturizer,LuxuryGlow,Moisturizer,52,Retinol
+16,387,DermaCare Moisturizer,DermaCare,Moisturizer,27,Vitamin C|Ceramides|Retinol
+17,160,DermaCare Moisturizer,DermaCare,Moisturizer,20,Retinol
+18,570,DermaCare Moisturizer,DermaCare,Moisturizer,142,Ceramides
+19,298,BudgetBeauty Moisturizer,BudgetBeauty,Moisturizer,13,Retinol|Vitamin C|Ceramides
+20,446,BudgetBeauty Serum,BudgetBeauty,Serum,118,Ceramides
+21,25,InfluenceX Serum,InfluenceX,Serum,132,Vitamin C|Hyaluronic Acid|Ceramides
+22,202,LuxuryGlow Serum,LuxuryGlow,Serum,107,Ceramides|Hyaluronic Acid|Vitamin C
+23,401,InfluenceX Serum,InfluenceX,Serum,57,Ceramides|Hyaluronic Acid
+24,61,ClinicalSkin Serum,ClinicalSkin,Serum,53,Hyaluronic Acid|Vitamin C
+25,226,LuxuryGlow Serum,LuxuryGlow,Serum,28,Retinol|Vitamin C
+26,405,LuxuryGlow Serum,LuxuryGlow,Serum,62,Vitamin C|Retinol|Hyaluronic Acid
+27,381,BudgetBeauty Serum,BudgetBeauty,Serum,98,Retinol|Hyaluronic Acid|Vitamin C
+28,249,InfluenceX Serum,InfluenceX,Serum,29,Hyaluronic Acid|Vitamin C
+29,62,DermaCare Serum,DermaCare,Serum,107,Vitamin C|Hyaluronic Acid
+30,546,ClinicalSkin Serum,ClinicalSkin,Serum,66,Hyaluronic Acid|Ceramides
+31,186,InfluenceX Serum,InfluenceX,Serum,31,Retinol
+32,468,ClinicalSkin Serum,ClinicalSkin,Serum,45,Vitamin C|Hyaluronic Acid|Retinol
+33,591,LuxuryGlow Serum,LuxuryGlow,Serum,118,Retinol|Hyaluronic Acid
+34,116,ClinicalSkin Serum,ClinicalSkin,Serum,71,Retinol
+35,1,DermaCare Serum,DermaCare,Serum,134,Hyaluronic Acid
+36,420,BudgetBeauty Serum,BudgetBeauty,Serum,35,Hyaluronic Acid|Vitamin C|Retinol
+37,141,InfluenceX Serum,InfluenceX,Serum,47,Vitamin C
+38,556,ClinicalSkin Serum,ClinicalSkin,Serum,35,Hyaluronic Acid|Retinol
+39,286,ClinicalSkin Serum,ClinicalSkin,Serum,43,Hyaluronic Acid|Ceramides
+40,64,LuxuryGlow Cleanser,LuxuryGlow,Cleanser,132,Ceramides|Salicylic Acid|Vitamin C
+41,268,DermaCare Cleanser,DermaCare,Cleanser,113,Salicylic Acid|Vitamin C|Ceramides
+42,462,BudgetBeauty Cleanser,BudgetBeauty,Cleanser,40,Vitamin C
+43,308,DermaCare Cleanser,DermaCare,Cleanser,135,Salicylic Acid|Vitamin C
+44,526,BudgetBeauty Cleanser,BudgetBeauty,Cleanser,34,Salicylic Acid|Ceramides|Hyaluronic Acid
+45,497,ClinicalSkin Cleanser,ClinicalSkin,Cleanser,36,Hyaluronic Acid|Ceramides
+46,214,ClinicalSkin Cleanser,ClinicalSkin,Cleanser,77,Salicylic Acid|Hyaluronic Acid|Retinol
+47,455,LuxuryGlow Cleanser,LuxuryGlow,Cleanser,66,Vitamin C|Salicylic Acid|Hyaluronic Acid
+48,527,DermaCare Cleanser,DermaCare,Cleanser,56,Retinol|Vitamin C
+49,312,LuxuryGlow Cleanser,LuxuryGlow,Cleanser,84,Retinol|Ceramides|Salicylic Acid
+50,168,DermaCare Cleanser,DermaCare,Cleanser,64,Salicylic Acid|Hyaluronic Acid
+51,447,InfluenceX Cleanser,InfluenceX,Cleanser,61,Salicylic Acid
+52,484,BudgetBeauty Cleanser,BudgetBeauty,Cleanser,114,Vitamin C|Hyaluronic Acid|Salicylic Acid
+53,222,InfluenceX Cleanser,InfluenceX,Cleanser,16,Ceramides
+54,582,BudgetBeauty Cleanser,BudgetBeauty,Cleanser,85,Hyaluronic Acid|Salicylic Acid|Retinol
+55,242,DermaCare Cleanser,DermaCare,Cleanser,45,Ceramides|Hyaluronic Acid
+56,412,BudgetBeauty Cleanser,BudgetBeauty,Cleanser,118,Hyaluronic Acid|Ceramides
+57,128,DermaCare Cleanser,DermaCare,Cleanser,85,Salicylic Acid|Retinol|Vitamin C
+58,433,LuxuryGlow Cleanser,LuxuryGlow,Cleanser,16,Hyaluronic Acid|Salicylic Acid
+59,503,BudgetBeauty Cleanser,BudgetBeauty,Cleanser,22,Ceramides|Salicylic Acid|Retinol
+60,133,InfluenceX Toner,InfluenceX,Toner,43,Ceramides|Hyaluronic Acid
+61,563,InfluenceX Toner,InfluenceX,Toner,87,Hyaluronic Acid
+62,583,BudgetBeauty Toner,BudgetBeauty,Toner,18,Ceramides|Hyaluronic Acid
+63,538,ClinicalSkin Toner,ClinicalSkin,Toner,88,Retinol
+64,178,InfluenceX Toner,InfluenceX,Toner,92,Vitamin C
+65,323,BudgetBeauty Toner,BudgetBeauty,Toner,89,Ceramides
+66,318,ClinicalSkin Toner,ClinicalSkin,Toner,114,Ceramides
+67,303,InfluenceX Toner,InfluenceX,Toner,76,Hyaluronic Acid
+68,353,BudgetBeauty Toner,BudgetBeauty,Toner,26,Hyaluronic Acid
+69,203,LuxuryGlow Toner,LuxuryGlow,Toner,99,Ceramides
+70,108,DermaCare Toner,DermaCare,Toner,70,Hyaluronic Acid
+71,38,BudgetBeauty Toner,BudgetBeauty,Toner,108,Ceramides
+72,393,LuxuryGlow Toner,LuxuryGlow,Toner,18,Retinol
+73,73,LuxuryGlow Toner,LuxuryGlow,Toner,64,Ceramides
+74,28,ClinicalSkin Toner,ClinicalSkin,Toner,48,Retinol|Hyaluronic Acid
+75,48,BudgetBeauty Toner,BudgetBeauty,Toner,43,Ceramides|Vitamin C
+76,478,ClinicalSkin Toner,ClinicalSkin,Toner,55,Ceramides
+77,488,ClinicalSkin Toner,ClinicalSkin,Toner,12,Retinol|Hyaluronic Acid
+78,573,LuxuryGlow Toner,LuxuryGlow,Toner,46,Ceramides
+79,143,ClinicalSkin Toner,ClinicalSkin,Toner,148,Hyaluronic Acid|Retinol
+80,489,DermaCare Sunscreen,DermaCare,Sunscreen,137,Ceramides|Hyaluronic Acid
+81,314,InfluenceX Sunscreen,InfluenceX,Sunscreen,146,Hyaluronic Acid
+82,319,DermaCare Sunscreen,DermaCare,Sunscreen,122,Retinol
+83,474,LuxuryGlow Sunscreen,LuxuryGlow,Sunscreen,134,Retinol
+84,424,BudgetBeauty Sunscreen,BudgetBeauty,Sunscreen,13,Ceramides|Vitamin C
+85,544,InfluenceX Sunscreen,InfluenceX,Sunscreen,31,Ceramides|Hyaluronic Acid
+86,49,LuxuryGlow Sunscreen,LuxuryGlow,Sunscreen,105,Hyaluronic Acid
+87,149,InfluenceX Sunscreen,InfluenceX,Sunscreen,17,Ceramides|Vitamin C
+88,89,ClinicalSkin Sunscreen,ClinicalSkin,Sunscreen,22,Retinol
+89,44,DermaCare Sunscreen,DermaCare,Sunscreen,133,Vitamin C
+90,79,BudgetBeauty Sunscreen,BudgetBeauty,Sunscreen,117,Retinol
+91,359,BudgetBeauty Sunscreen,BudgetBeauty,Sunscreen,39,Retinol
+92,399,InfluenceX Sunscreen,InfluenceX,Sunscreen,41,Retinol
+93,254,DermaCare Sunscreen,DermaCare,Sunscreen,33,Ceramides|Vitamin C
+94,224,LuxuryGlow Sunscreen,LuxuryGlow,Sunscreen,83,Hyaluronic Acid
+95,159,InfluenceX Sunscreen,InfluenceX,Sunscreen,65,Vitamin C
+96,554,ClinicalSkin Sunscreen,ClinicalSkin,Sunscreen,62,Retinol|Vitamin C
+97,209,DermaCare Sunscreen,DermaCare,Sunscreen,75,Ceramides
+98,99,BudgetBeauty Sunscreen,BudgetBeauty,Sunscreen,11,Retinol
+99,219,BudgetBeauty Sunscreen,BudgetBeauty,Sunscreen,139,Hyaluronic Acid
