@@ -25,6 +25,9 @@ app.use("/api/brands", require("./src/routes/brand.routes"));
 app.use("/api/ingredients", require("./src/routes/ingredient.routes"));
 app.use("/api/categories", require("./src/routes/category.routes"));
 app.use("/api/products", require("./src/routes/product.routes"));
+app.use("/api/assessment", require("./src/routes/assessment.routes"));
+app.use("/api/routines", require("./src/routes/routine.routes"));
+app.use("/api/progress-logs", require("./src/routes/progress.routes"));
 app.get("/api/protected", authMiddleware, (req, res) => {
   res.json({ message: "E kalove mbrojtjen!", user: req.user });
 });
