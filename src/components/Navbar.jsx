@@ -16,43 +16,51 @@ export default function Navbar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="bg-white border-b border-gray-100 px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+    <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-white/40 bg-white/55 px-4 py-3 shadow-sm shadow-black/5 backdrop-blur-2xl md:px-8">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-400 flex items-center justify-center">
-          <span className="text-white text-sm font-bold">S</span>
-        </div>
-        <div>
-          <Link to="/" className="text-lg font-bold text-gray-900">
-            SkinCare AI
-          </Link>
-          <p className="text-xs text-purple-400 -mt-1">Intelligence Platform</p>
-        </div>
+        <Link to="/" className="flex items-center">
+          <span className="rounded-full bg-white/55 p-1.5 shadow-sm shadow-[#8b7a6d]/10 ring-1 ring-white/70 backdrop-blur-xl">
+            <img
+              src="/images/aura-emblem-logo.png"
+              alt="AuraSkin emblem"
+              className="h-12 w-12 rounded-full object-cover object-center md:h-14 md:w-14"
+            />
+          </span>
+          <span className="ml-3 hidden leading-tight sm:block">
+            <span className="block text-base font-semibold text-[#151712]">
+              AuraSkin
+            </span>
+            <span className="block text-xs font-medium text-[#844D63]">
+              Personalized Skincare
+            </span>
+          </span>
+        </Link>
       </div>
 
-      <div className="flex gap-1 items-center">
+      <div className="flex items-center gap-1">
         <Link
           to="/products"
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${isActive("/products") ? "bg-purple-50 text-purple-600" : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"}`}
+          className={`hidden rounded-full px-4 py-2 text-sm font-medium transition sm:inline-flex ${isActive("/products") ? "bg-white/80 text-[#151712] shadow-sm" : "text-gray-500 hover:bg-white/70 hover:text-gray-900"}`}
         >
           Produkte
+        </Link>
+        <Link
+          to="/quiz"
+          className={`rounded-full border border-white/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide shadow-sm backdrop-blur transition md:text-sm ${isActive("/quiz") ? "bg-[#151712] text-white" : "bg-[#151712]/90 text-white hover:bg-[#303326]"}`}
+        >
+          Take Quiz
         </Link>
         {isAuthenticated ? (
           <>
             <Link
-              to="/quiz"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${isActive("/quiz") ? "bg-purple-50 text-purple-600" : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"}`}
-            >
-              Quiz
-            </Link>
-            <Link
               to="/routine"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${isActive("/routine") ? "bg-purple-50 text-purple-600" : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"}`}
+              className={`hidden rounded-full px-4 py-2 text-sm font-medium transition md:inline-flex ${isActive("/routine") ? "bg-white/80 text-[#151712] shadow-sm" : "text-gray-500 hover:bg-white/70 hover:text-gray-900"}`}
             >
               Rutina
             </Link>
             <Link
               to="/dashboard"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${isActive("/dashboard") ? "bg-purple-50 text-purple-600" : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"}`}
+              className={`hidden rounded-full px-4 py-2 text-sm font-medium transition lg:inline-flex ${isActive("/dashboard") ? "bg-white/80 text-[#151712] shadow-sm" : "text-gray-500 hover:bg-white/70 hover:text-gray-900"}`}
             >
               Dashboard
             </Link>
@@ -67,13 +75,13 @@ export default function Navbar() {
           <>
             <Link
               to="/login"
-              className="px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-900"
+              className="hidden rounded-full px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 sm:inline-flex"
             >
               Hyr
             </Link>
             <Link
               to="/register"
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-400 text-white hover:opacity-90 transition"
+              className="rounded-full bg-white/70 px-4 py-2 text-sm font-medium text-[#844D63] shadow-sm ring-1 ring-white/60 transition hover:bg-white"
             >
               Regjistrohu
             </Link>
