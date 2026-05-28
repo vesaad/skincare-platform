@@ -6,11 +6,15 @@ const colors = [
   "from-pink-100 to-rose-100",
 ];
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, onSelect }) {
   const categoryLabel =
     typeof product.category === "string"
       ? product.category
       : product.category?.name ?? "";
+  const brandLabel =
+    typeof product.brand === "string"
+      ? product.brand
+      : product.brand?.name || "Brand";
   const placeholderLetter = (
     categoryLabel[0] ||
     product.name?.[0] ||
@@ -22,7 +26,11 @@ export default function ProductCard({ product }) {
     : Math.floor(70 + (product.id % 29));
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition group overflow-hidden">
+    <button
+      type="button"
+      onClick={() => onSelect?.(product)}
+      className="bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition group overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-purple-300"
+    >
       <div className="relative h-36 overflow-hidden bg-gray-50">
         {product.imageUrl ? (
           <img
@@ -53,9 +61,7 @@ export default function ProductCard({ product }) {
 
       <div className="p-4">
         <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">
-          {typeof product.brand === "string"
-            ? product.brand
-            : product.brand?.name || "Brand"}
+          {brandLabel}
         </p>
         <h3 className="font-semibold text-gray-900 text-sm mb-2 leading-tight">
           {product.name}
@@ -79,6 +85,6 @@ export default function ProductCard({ product }) {
 
         <p className="font-bold text-gray-900">${product.price}</p>
       </div>
-    </div>
+    </button>
   );
 }

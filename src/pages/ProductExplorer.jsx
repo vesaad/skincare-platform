@@ -10,6 +10,7 @@ export default function ProductExplorer() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({});
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const categories = [
     "Serum",
@@ -62,6 +63,79 @@ export default function ProductExplorer() {
     });
     setPage(1);
   };
+
+  const describeIngredients = (ingredients) => {
+    const ingredientList = ingredients
+      ? ingredients.split("|").map((item) => item.trim()).filter(Boolean)
+      : [];
+
+    const benefits = {
+      "Hyaluronic Acid": "helps attract hydration and keep the skin feeling plump",
+      Ceramides: "support the skin barrier and help reduce moisture loss",
+      Retinol: "supports smoother-looking texture and targets signs of aging",
+      "Vitamin C": "helps brighten the look of dull skin and supports an even tone",
+      "Salicylic Acid": "helps clear excess oil and smooth clogged-looking pores",
+    };
+
+    const benefitText = ingredientList
+      .map((ingredient) => benefits[ingredient])
+      .filter(Boolean);
+
+    return {
+      ingredients:
+        ingredientList.length > 0
+          ? ingredientList.join(", ")
+          : "skin-supporting ingredients",
+      benefitText,
+    };
+  };
+
+  const buildProductDescription = (product, brand, category) => {
+    if (product.description) return product.description;
+
+    const { ingredients, benefitText } = describeIngredients(product.ingredients);
+    const categoryDescriptions = {
+      Cleanser:
+        "This cleanser is made for washing away daily buildup while keeping the routine simple.",
+      Moisturizer:
+        "This moisturizer is made to help keep the skin comfortable, hydrated, and protected from dryness.",
+      Serum:
+        "This serum is made as a targeted treatment step for concerns like texture, dullness, or uneven tone.",
+      Sunscreen:
+        "This sunscreen is made for daytime protection and works best as the final step of a morning routine.",
+      Toner:
+        "This toner is made as a light balancing step after cleansing and before treatment products.",
+    };
+
+    const categoryText =
+      categoryDescriptions[category] ||
+      "This product is made to support a simple skincare routine.";
+    const benefitSentence =
+      benefitText.length > 0
+        ? `Its key ingredients include ${ingredients}, which ${benefitText.join(" and ")}.`
+        : `Its formula includes ${ingredients}.`;
+
+    return `${categoryText} ${benefitSentence} ${brand} ${category.toLowerCase()} is a good option to compare by ingredients and price before choosing what fits your skin needs.`;
+  };
+
+  const getProductDetails = (product) => {
+    const brand =
+      typeof product.brand === "string"
+        ? product.brand
+        : product.brand?.name || "Brand";
+    const category =
+      typeof product.category === "string"
+        ? product.category
+        : product.category?.name || "Product";
+    const { ingredients } = describeIngredients(product.ingredients);
+    const description = buildProductDescription(product, brand, category);
+
+    return { brand, category, ingredients, description };
+  };
+
+  const selectedDetails = selectedProduct
+    ? getProductDetails(selectedProduct)
+    : null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -168,7 +242,11 @@ export default function ProductExplorer() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {list.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard
+                key={p.id}
+                product={p}
+                onSelect={setSelectedProduct}
+              />
             ))}
           </div>
         )}
@@ -197,6 +275,96 @@ export default function ProductExplorer() {
           </button>
         </div>
       </div>
+
+      {selectedProduct && selectedDetails && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="product-detail-title"
+          onClick={() => setSelectedProduct(null)}
+        >
+          <div
+            className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="grid gap-0 md:grid-cols-[240px_1fr]">
+              <div className="relative flex min-h-64 items-center justify-center bg-gray-50 p-6">
+                {selectedProduct.imageUrl ? (
+                  <img
+                    src={selectedProduct.imageUrl}
+                    alt={selectedProduct.name}
+                    className="max-h-56 w-full object-contain"
+                  />
+                ) : (
+                  <div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-purple-50 text-4xl font-bold text-purple-600">
+                    {selectedProduct.name?.[0] || "?"}
+                  </div>
+                )}
+                <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-semibold text-purple-600 shadow-sm">
+                  {selectedDetails.category}
+                </span>
+              </div>
+
+              <div className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      {selectedDetails.brand}
+                    </p>
+                    <h2
+                      id="product-detail-title"
+                      className="mt-1 text-2xl font-bold text-gray-900"
+                    >
+                      {selectedProduct.name}
+                    </h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedProduct(null)}
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                    aria-label="Close product details"
+                  >
+                    x
+                  </button>
+                </div>
+
+                <p className="mt-4 text-sm leading-6 text-gray-600">
+                  {selectedDetails.description}
+                </p>
+
+                <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
+                  <div className="rounded-lg bg-gray-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      Price
+                    </p>
+                    <p className="mt-1 font-bold text-gray-900">
+                      ${selectedProduct.price}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-gray-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      Category
+                    </p>
+                    <p className="mt-1 font-semibold text-gray-900">
+                      {selectedDetails.category}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Ingredients
+                  </p>
+                  <p className="mt-2 text-sm text-gray-700">
+                    {selectedDetails.ingredients}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
