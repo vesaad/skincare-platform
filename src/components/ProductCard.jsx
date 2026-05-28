@@ -6,6 +6,42 @@ const colors = [
   "from-pink-100 to-rose-100",
 ];
 
+const categoryStyles = {
+  Cleanser: {
+    badge: "bg-sky-50 text-sky-600",
+    ring: "group-hover:border-sky-200",
+    image: "bg-sky-50",
+  },
+  Moisturizer: {
+    badge: "bg-pink-50 text-pink-600",
+    ring: "group-hover:border-pink-200",
+    image: "bg-pink-50",
+  },
+  Serum: {
+    badge: "bg-purple-50 text-purple-600",
+    ring: "group-hover:border-purple-200",
+    image: "bg-purple-50",
+  },
+  Sunscreen: {
+    badge: "bg-amber-50 text-amber-600",
+    ring: "group-hover:border-amber-200",
+    image: "bg-amber-50",
+  },
+  Toner: {
+    badge: "bg-emerald-50 text-emerald-600",
+    ring: "group-hover:border-emerald-200",
+    image: "bg-emerald-50",
+  },
+};
+
+const benefitLabels = {
+  "Hyaluronic Acid": "Hydrating",
+  Ceramides: "Barrier support",
+  Retinol: "Texture care",
+  "Vitamin C": "Brightening",
+  "Salicylic Acid": "Oil control",
+};
+
 export default function ProductCard({ product, onSelect }) {
   const categoryLabel =
     typeof product.category === "string"
@@ -24,19 +60,28 @@ export default function ProductCard({ product, onSelect }) {
   const match = product.matchScore
     ? Math.round(product.matchScore * 100)
     : Math.floor(70 + (product.id % 29));
+  const categoryStyle = categoryStyles[categoryLabel] || {
+    badge: "bg-gray-100 text-gray-500",
+    ring: "group-hover:border-purple-200",
+    image: "bg-gray-50",
+  };
+  const ingredientList = product.ingredients
+    ? product.ingredients.split("|").map((item) => item.trim()).filter(Boolean)
+    : [];
+  const benefit = ingredientList.map((item) => benefitLabels[item]).find(Boolean);
 
   return (
     <button
       type="button"
       onClick={() => onSelect?.(product)}
-      className="bg-white rounded-2xl border border-gray-100 hover:shadow-lg transition group overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-purple-300"
+      className={`group h-full w-full overflow-hidden rounded-2xl border border-gray-100 bg-white text-left transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-300 ${categoryStyle.ring}`}
     >
-      <div className="relative h-36 overflow-hidden bg-gray-50">
+      <div className={`relative h-36 overflow-hidden ${categoryStyle.image}`}>
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-full object-contain p-3"
+            className="h-full w-full object-contain p-3 transition duration-300 group-hover:scale-105"
             onError={(e) => {
               e.target.onerror = null;
               e.target.parentNode.innerHTML = `
@@ -57,6 +102,9 @@ export default function ProductCard({ product, onSelect }) {
         <span className="absolute top-2 right-2 bg-white text-purple-600 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
           {match}% match
         </span>
+        <span className="absolute bottom-2 left-2 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-purple-600 opacity-0 shadow-sm transition group-hover:opacity-100">
+          View details
+        </span>
       </div>
 
       <div className="p-4">
@@ -66,6 +114,9 @@ export default function ProductCard({ product, onSelect }) {
         <h3 className="font-semibold text-gray-900 text-sm mb-2 leading-tight">
           {product.name}
         </h3>
+        {benefit && (
+          <p className="mb-3 text-xs font-medium text-pink-500">{benefit}</p>
+        )}
 
         <div className="flex flex-wrap gap-1 mb-3">
           {product.productIngredients?.slice(0, 2).map((pi) => (
@@ -77,7 +128,9 @@ export default function ProductCard({ product, onSelect }) {
             </span>
           ))}
           {categoryLabel && (
-            <span className="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full">
+            <span
+              className={`${categoryStyle.badge} text-xs px-2 py-0.5 rounded-full`}
+            >
               {categoryLabel}
             </span>
           )}

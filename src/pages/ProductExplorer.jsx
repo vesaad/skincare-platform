@@ -6,7 +6,7 @@ import ProductCard from "../components/ProductCard";
 
 export default function ProductExplorer() {
   const dispatch = useDispatch();
-  const { list, loading } = useSelector((s) => s.products);
+  const { list, loading, total } = useSelector((s) => s.products);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({});
@@ -27,12 +27,25 @@ export default function ProductExplorer() {
     "InfluenceX",
     "BudgetBeauty",
   ];
+  const pageSize = 12;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
+    .filter((pageNumber) => Math.abs(pageNumber - page) <= 1)
+    .slice(0, 3);
+  const activeFilterCount = Object.values(filters).filter(Boolean).length;
+  const categoryStyles = {
+    Cleanser: "bg-sky-50 text-sky-600 border-sky-100",
+    Moisturizer: "bg-pink-50 text-pink-600 border-pink-100",
+    Serum: "bg-purple-50 text-purple-600 border-purple-100",
+    Sunscreen: "bg-amber-50 text-amber-600 border-amber-100",
+    Toner: "bg-emerald-50 text-emerald-600 border-emerald-100",
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
       dispatch(setLoading(true));
       try {
-        const params = { page, limit: 12, q: search };
+        const params = { page, limit: pageSize, q: search };
         if (filters.category) params.category = filters.category;
         if (filters.skinType) params.skinType = filters.skinType;
         if (filters.brand) params.brand = filters.brand;
@@ -76,6 +89,13 @@ export default function ProductExplorer() {
       "Vitamin C": "helps brighten the look of dull skin and supports an even tone",
       "Salicylic Acid": "helps clear excess oil and smooth clogged-looking pores",
     };
+    const chips = {
+      "Hyaluronic Acid": "Hydrating",
+      Ceramides: "Barrier support",
+      Retinol: "Texture care",
+      "Vitamin C": "Brightening",
+      "Salicylic Acid": "Oil control",
+    };
 
     const benefitText = ingredientList
       .map((ingredient) => benefits[ingredient])
@@ -87,6 +107,7 @@ export default function ProductExplorer() {
           ? ingredientList.join(", ")
           : "skin-supporting ingredients",
       benefitText,
+      benefitChips: ingredientList.map((ingredient) => chips[ingredient]).filter(Boolean),
     };
   };
 
@@ -127,37 +148,57 @@ export default function ProductExplorer() {
       typeof product.category === "string"
         ? product.category
         : product.category?.name || "Product";
-    const { ingredients } = describeIngredients(product.ingredients);
+    const { ingredients, benefitChips } = describeIngredients(product.ingredients);
     const description = buildProductDescription(product, brand, category);
 
-    return { brand, category, ingredients, description };
+    return { brand, category, ingredients, description, benefitChips };
   };
 
   const selectedDetails = selectedProduct
     ? getProductDetails(selectedProduct)
     : null;
 
+  useEffect(() => {
+    if (!loading && page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [loading, page, totalPages]);
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className="w-56 bg-white border-r border-gray-100 p-6 flex-shrink-0">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-          Filtrat
-        </p>
+      <div className="w-60 flex-shrink-0 border-r border-pink-100 bg-gradient-to-b from-white via-pink-50/40 to-white p-6">
+        <div className="mb-5 flex items-center justify-between">
+          <p className="text-xs font-bold uppercase tracking-wider text-pink-500">
+            Filtrat
+          </p>
+          {activeFilterCount > 0 && (
+            <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-600">
+              {activeFilterCount}
+            </span>
+          )}
+        </div>
 
         <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
           Kategoria
         </p>
-        <div className="flex flex-col gap-1 mb-5">
+        <div className="flex flex-col gap-2 mb-6">
           {categories.map((c) => (
-            <label key={c} className="flex items-center gap-2 cursor-pointer">
+            <label
+              key={c}
+              className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition ${
+                filters.category === c
+                  ? categoryStyles[c] || "border-purple-100 bg-purple-50 text-purple-600"
+                  : "border-transparent bg-white/70 text-gray-600 hover:border-pink-100 hover:bg-white"
+              }`}
+            >
               <input
                 type="checkbox"
                 checked={filters.category === c}
                 onChange={() => toggleFilter("category", c)}
                 className="accent-purple-500"
               />
-              <span className="text-sm text-gray-600">{c}</span>
+              <span className="text-sm font-medium">{c}</span>
             </label>
           ))}
         </div>
@@ -165,16 +206,23 @@ export default function ProductExplorer() {
         <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
           Lloji i lëkurës
         </p>
-        <div className="flex flex-col gap-1 mb-5">
+        <div className="flex flex-col gap-2 mb-6">
           {skinTypes.map((s) => (
-            <label key={s} className="flex items-center gap-2 cursor-pointer">
+            <label
+              key={s}
+              className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition ${
+                filters.skinType === s
+                  ? "border-pink-100 bg-pink-50 text-pink-600"
+                  : "border-transparent bg-white/70 text-gray-600 hover:border-pink-100 hover:bg-white"
+              }`}
+            >
               <input
                 type="checkbox"
                 checked={filters.skinType === s}
                 onChange={() => toggleFilter("skinType", s)}
                 className="accent-purple-500"
               />
-              <span className="text-sm text-gray-600">{s}</span>
+              <span className="text-sm font-medium">{s}</span>
             </label>
           ))}
         </div>
@@ -182,16 +230,23 @@ export default function ProductExplorer() {
         <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
           Marka
         </p>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           {brands.map((b) => (
-            <label key={b} className="flex items-center gap-2 cursor-pointer">
+            <label
+              key={b}
+              className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition ${
+                filters.brand === b
+                  ? "border-purple-100 bg-purple-50 text-purple-600"
+                  : "border-transparent bg-white/70 text-gray-600 hover:border-pink-100 hover:bg-white"
+              }`}
+            >
               <input
                 type="checkbox"
                 checked={filters.brand === b}
                 onChange={() => toggleFilter("brand", b)}
                 className="accent-purple-500"
               />
-              <span className="text-sm text-gray-600">{b}</span>
+              <span className="text-sm font-medium">{b}</span>
             </label>
           ))}
         </div>
@@ -215,7 +270,7 @@ export default function ProductExplorer() {
             />
           </div>
           <p className="text-sm text-gray-400 ml-4">
-            Duke shfaqur {list.length} produkte
+            Duke shfaqur {list.length} nga {total} produkte
           </p>
         </div>
 
@@ -232,6 +287,17 @@ export default function ProductExplorer() {
                 </span>
               ) : null,
             )}
+            <button
+              type="button"
+              onClick={() => {
+                setFilters({});
+                setSearch("");
+                setPage(1);
+              }}
+              className="rounded-full border border-pink-100 bg-white px-3 py-1 text-xs font-medium text-pink-500 hover:bg-pink-50"
+            >
+              Clear all
+            </button>
           </div>
         )}
 
@@ -239,7 +305,7 @@ export default function ProductExplorer() {
           <div className="flex items-center justify-center h-64">
             <div className="text-purple-400 text-lg">Duke u ngarkuar...</div>
           </div>
-        ) : (
+        ) : list.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {list.map((p) => (
               <ProductCard
@@ -249,16 +315,51 @@ export default function ProductExplorer() {
               />
             ))}
           </div>
+        ) : (
+          <div className="flex min-h-80 items-center justify-center rounded-2xl border border-dashed border-pink-200 bg-white/70 p-8 text-center">
+            <div>
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-pink-50 text-2xl font-bold text-pink-500">
+                ?
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                No products match these filters
+              </h3>
+              <p className="mt-2 max-w-sm text-sm leading-6 text-gray-500">
+                Try removing a filter or searching with a different product,
+                brand, or ingredient.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setFilters({});
+                  setSearch("");
+                  setPage(1);
+                }}
+                className="mt-5 rounded-lg bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600"
+              >
+                Reset filters
+              </button>
+            </div>
+          </div>
         )}
 
         <div className="flex gap-2 mt-8 justify-center items-center">
           <button
+            type="button"
+            onClick={() => setPage(1)}
+            disabled={page === 1}
+            className="h-9 rounded-lg border border-pink-100 bg-white px-3 text-xs font-semibold text-pink-500 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Shko prap ne fillim
+          </button>
+          <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-100"
+            disabled={page === 1}
+            className="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
           >
             ←
           </button>
-          {[1, 2, 3].map((n) => (
+          {pageNumbers.map((n) => (
             <button
               key={n}
               onClick={() => setPage(n)}
@@ -268,10 +369,19 @@ export default function ProductExplorer() {
             </button>
           ))}
           <button
-            onClick={() => setPage((p) => p + 1)}
-            className="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-100"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
           >
             →
+          </button>
+          <button
+            type="button"
+            onClick={() => setPage(totalPages)}
+            disabled={page === totalPages}
+            className="h-9 rounded-lg border border-purple-100 bg-white px-3 text-xs font-semibold text-purple-500 hover:bg-purple-50 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Faqja e fundit
           </button>
         </div>
       </div>
@@ -301,7 +411,12 @@ export default function ProductExplorer() {
                     {selectedProduct.name?.[0] || "?"}
                   </div>
                 )}
-                <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-semibold text-purple-600 shadow-sm">
+                <span
+                  className={`absolute left-4 top-4 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm ${
+                    categoryStyles[selectedDetails.category] ||
+                    "border-purple-100 bg-purple-50 text-purple-600"
+                  }`}
+                >
                   {selectedDetails.category}
                 </span>
               </div>
@@ -322,7 +437,7 @@ export default function ProductExplorer() {
                   <button
                     type="button"
                     onClick={() => setSelectedProduct(null)}
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-pink-400 hover:bg-pink-50 hover:text-pink-700"
                     aria-label="Close product details"
                   >
                     x
@@ -333,20 +448,33 @@ export default function ProductExplorer() {
                   {selectedDetails.description}
                 </p>
 
+                {selectedDetails.benefitChips.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {selectedDetails.benefitChips.map((chip) => (
+                      <span
+                        key={chip}
+                        className="rounded-full border border-pink-100 bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-600"
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
                 <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
-                  <div className="rounded-lg bg-gray-50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <div className="rounded-lg border border-pink-100 bg-pink-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-pink-400">
                       Price
                     </p>
-                    <p className="mt-1 font-bold text-gray-900">
+                    <p className="mt-1 font-bold text-pink-700">
                       ${selectedProduct.price}
                     </p>
                   </div>
-                  <div className="rounded-lg bg-gray-50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <div className="rounded-lg border border-purple-100 bg-purple-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-purple-400">
                       Category
                     </p>
-                    <p className="mt-1 font-semibold text-gray-900">
+                    <p className="mt-1 font-semibold text-purple-700">
                       {selectedDetails.category}
                     </p>
                   </div>
