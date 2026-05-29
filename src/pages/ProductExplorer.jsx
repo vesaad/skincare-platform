@@ -19,7 +19,13 @@ export default function ProductExplorer() {
     "Sunscreen",
     "Toner",
   ];
-  const skinTypes = ["Yndyrore", "E thatë", "Mikse", "Normale", "E ndjeshme"];
+  const skinTypes = [
+  { label: "Yndyrore", value: "Oily" },
+  { label: "E thatë", value: "Dry" },
+  { label: "Mikse", value: "Combination" },
+  { label: "Normale", value: "Normal" },
+  { label: "E ndjeshme", value: "Sensitive" },
+];
   const brands = [
     "LuxuryGlow",
     "DermaCare",
@@ -65,6 +71,7 @@ export default function ProductExplorer() {
   }, [page, search, filters]);
 
   const toggleFilter = (key, value) => {
+    console.log('toggleFilter:', key, value);
     setFilters((f) => {
       const current = { ...f };
       if (current[key] === value) {
@@ -72,6 +79,7 @@ export default function ProductExplorer() {
       } else {
         current[key] = value;
       }
+      console.log('new filters:', current);
       return current;
     });
     setPage(1);
@@ -208,23 +216,23 @@ export default function ProductExplorer() {
         </p>
         <div className="flex flex-col gap-2 mb-6">
           {skinTypes.map((s) => (
-            <label
-              key={s}
-              className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition ${
-                filters.skinType === s
-                  ? "border-pink-100 bg-pink-50 text-pink-600"
-                  : "border-transparent bg-white/70 text-gray-600 hover:border-pink-100 hover:bg-white"
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={filters.skinType === s}
-                onChange={() => toggleFilter("skinType", s)}
-                className="accent-purple-500"
-              />
-              <span className="text-sm font-medium">{s}</span>
-            </label>
-          ))}
+  <label
+    key={s.value}
+    className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition ${
+      filters.skinType === s
+        ? "border-pink-100 bg-pink-50 text-pink-600"
+        : "border-transparent bg-white/70 text-gray-600 hover:border-pink-100 hover:bg-white"
+    }`}
+  >
+    <input
+      type="checkbox"
+      checked={filters.skinType === s.value}
+      onChange={() => toggleFilter("skinType", s.value)}
+      className="accent-purple-500"
+    />
+    <span className="text-sm font-medium">{s.label}</span>
+  </label>
+))}
         </div>
 
         <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
@@ -282,7 +290,7 @@ export default function ProductExplorer() {
                   key={k}
                   className="flex items-center gap-1 bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-xs font-medium"
                 >
-                  {v}
+                  {typeof v === 'string' ? v : v?.label || v?.value || ''}
                   <button onClick={() => toggleFilter(k, v)}>×</button>
                 </span>
               ) : null,
