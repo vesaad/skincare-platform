@@ -119,38 +119,91 @@ const shopUrls = {
 function ProductStepCard({ product }) {
   const shopUrl = shopUrls[product.product_id] ||
     `https://www.google.com/search?q=${encodeURIComponent(product.name + ' ' + product.brand + ' buy')}`;
+  const ingredients = product.ingredients || [];
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition">
-      <div className="flex items-start gap-4">
+    <article className="group rounded-[2rem] border border-white/75 bg-white/60 p-4 shadow-sm shadow-black/5 backdrop-blur-xl transition hover:-translate-y-1 hover:bg-white/75 hover:shadow-xl hover:shadow-[#8b7a6d]/10 md:p-5">
+      <div className="grid gap-5 sm:grid-cols-[140px_1fr]">
+        <div className="flex min-h-40 items-center justify-center rounded-[1.5rem] bg-[#fbf8f4] p-5 ring-1 ring-white/80">
+          <img
+            src={`/images/products/${product.product_id}.jpg`}
+            alt={product.name}
+            className="h-32 w-full object-contain transition duration-300 group-hover:scale-105"
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+        </div>
+        <div className="flex min-w-0 flex-col">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#844D63]">
+                {product.step}
+              </p>
+              <h3 className="mt-2 text-xl font-semibold leading-tight text-[#151712]">
+                {product.name}
+              </h3>
+              <p className="mt-1 text-sm font-medium text-[#8b8a7f]">
+                {product.brand}
+              </p>
+            </div>
+            <p className="rounded-full bg-[#ead5dd] px-4 py-2 text-lg font-bold text-[#844D63]">
+              ${product.price}
+            </p>
+          </div>
+
+          <p className="mt-4 text-sm leading-6 text-[#62665d]">
+            Selected for this step because it supports your recommended routine
+            with ingredients that match your skin profile.
+          </p>
+
+          {ingredients.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {ingredients.map((ing) => (
+                <span
+                  key={ing}
+                  className="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-[#62665d] ring-1 ring-[#eadfd9]"
+                >
+                  {ing}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <a
+              href={shopUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-[#151712]/90 px-5 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-black/10 transition hover:bg-[#303326]"
+            >
+              Shop now
+            </a>
+            <span className="text-xs font-medium uppercase tracking-[0.18em] text-[#9b948a]">
+              Step matched by AuraSkin
+            </span>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function MiniProductCard({ product }) {
+  return (
+    <div className="rounded-[1.5rem] border border-white/70 bg-white/55 p-4 backdrop-blur-xl">
+      <div className="flex items-center gap-3">
         <img
           src={`/images/products/${product.product_id}.jpg`}
           alt={product.name}
-          className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+          className="h-16 w-16 rounded-2xl bg-[#fbf8f4] object-contain p-2"
           onError={(e) => { e.target.style.display = 'none'; }}
         />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-purple-600 uppercase tracking-wider">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#844D63]">
             {product.step}
           </p>
-          <h3 className="font-semibold text-gray-900 mt-1">{product.name}</h3>
-          <p className="text-sm text-gray-400">{product.brand}</p>
-          <p className="text-lg font-bold text-gray-900 mt-2">${product.price}</p>
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {(product.ingredients || []).map((ing) => (
-              <span key={ing} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                {ing}
-              </span>
-            ))}
-          </div>
-          <a
-            href={shopUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block mt-3 text-sm font-medium text-purple-600 hover:text-purple-800 underline underline-offset-2"
-          >
-            Shop Now &rarr;
-          </a>
+          <p className="truncate text-sm font-semibold text-[#151712]">
+            {product.name}
+          </p>
         </div>
       </div>
     </div>
@@ -160,21 +213,27 @@ function ProductStepCard({ product }) {
 export default function Routine() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { data, savedRoutineId } = useSelector((s) => s.routine);
+  const { data, savedRoutineId, profile } = useSelector((s) => s.routine);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center px-6">
-        <div className="text-center max-w-md">
-          <p className="text-gray-500 mb-6">
-            No routine yet. Complete the quiz to get your personalized plan.
+      <div className="flex min-h-screen items-center justify-center bg-[#f7f3ec] px-6">
+        <div className="max-w-md rounded-[2.5rem] border border-white/70 bg-white/55 p-8 text-center shadow-2xl shadow-black/10 backdrop-blur-2xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#844D63]">
+            No routine yet
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold text-[#151712]">
+            Start with your skin profile.
+          </h1>
+          <p className="mt-4 text-sm leading-6 text-[#62665d]">
+            Complete the AuraSkin quiz to reveal a personalized plan.
           </p>
           <Link
             to="/quiz"
-            className="inline-block px-6 py-3 bg-gray-900 text-white rounded-2xl font-medium"
+            className="mt-6 inline-block rounded-full bg-[#151712]/90 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-black/10"
           >
             Take the Quiz
           </Link>
@@ -200,54 +259,174 @@ export default function Routine() {
     }
   };
 
+  const products = data.products || [];
+  const routineName = data.routine?.replace(" Routine", "") || "Personalized";
+  const confidence = Math.round(data.confidence || 0);
+  const totalPrice = products.reduce(
+    (sum, product) => sum + Number(product.price || 0),
+    0,
+  );
+
   return (
-    <div className="min-h-screen bg-[#faf9f7]">
-      <div className="max-w-2xl mx-auto px-6 py-12">
-        <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-2">
-          Your personalized plan
-        </p>
-        <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
-          {data.routine.replace(" Routine", "")} Routine
-        </h1>
-        <p className="text-gray-400 mt-2">
-          Model confidence:{" "}
-          <span className="font-semibold text-gray-700">{data.confidence}%</span>
-        </p>
+    <main className="min-h-screen overflow-hidden bg-[#f7f3ec] text-[#151712]">
+      <section className="relative px-4 py-10 md:px-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(132,77,99,0.14),transparent_30%),radial-gradient(circle_at_92%_12%,rgba(184,146,95,0.18),transparent_30%),linear-gradient(135deg,#fbf8f4_0%,#f7f3ec_55%,#efe7df_100%)]" />
+        <div className="relative mx-auto max-w-7xl">
+          <div className="grid gap-6 lg:grid-cols-[0.92fr_0.58fr]">
+            <div className="rounded-[3rem] border border-white/70 bg-white/45 p-6 shadow-2xl shadow-[#8b7a6d]/15 backdrop-blur-2xl md:p-10">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#844D63]">
+                Your personalized plan
+              </p>
+              <div className="mt-5 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+                <div>
+                  <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
+                    {routineName} Routine
+                  </h1>
+                  <p className="mt-5 max-w-2xl text-base leading-7 text-[#62665d]">
+                    A polished routine built from your quiz answers, organized
+                    into simple steps you can actually follow.
+                  </p>
+                </div>
+                <div className="rounded-[2rem] border border-white/75 bg-white/55 p-5 text-center shadow-sm backdrop-blur-xl">
+                  <p className="text-5xl font-semibold text-[#844D63]">
+                    {confidence}%
+                  </p>
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#8b8a7f]">
+                    Match confidence
+                  </p>
+                </div>
+              </div>
 
-        <div className="mt-10 flex flex-col gap-4">
-          {data.products?.map((p) => (
-            <ProductStepCard key={`${p.step}-${p.product_id}`} product={p} />
-          ))}
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-[1.5rem] bg-white/60 p-4 ring-1 ring-white/80">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#844D63]">
+                    Products
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold">{products.length}</p>
+                </div>
+                <div className="rounded-[1.5rem] bg-white/60 p-4 ring-1 ring-white/80">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#844D63]">
+                    Estimated total
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold">${totalPrice}</p>
+                </div>
+                <div className="rounded-[1.5rem] bg-white/60 p-4 ring-1 ring-white/80">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#844D63]">
+                    Skin type
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold">
+                    {profile?.Skin_Type || "Personal"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <aside className="rounded-[3rem] border border-white/70 bg-white/35 p-6 shadow-xl shadow-black/5 backdrop-blur-2xl md:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#844D63]">
+                Routine preview
+              </p>
+              <div className="mt-5 space-y-3">
+                {products.slice(0, 3).map((product) => (
+                  <MiniProductCard
+                    key={`${product.step}-${product.product_id}-mini`}
+                    product={product}
+                  />
+                ))}
+              </div>
+              <div className="mt-6 rounded-[2rem] bg-[#151712]/90 p-5 text-white shadow-xl shadow-black/10">
+                <p className="text-sm font-semibold">Why this routine?</p>
+                <p className="mt-2 text-sm leading-6 text-white/75">
+                  Because your quiz profile points to {routineName.toLowerCase()}
+                  -focused support with products ordered by routine step.
+                </p>
+              </div>
+            </aside>
+          </div>
+
+          <div className="mt-8 grid gap-6 lg:grid-cols-[0.22fr_1fr]">
+            <div className="hidden lg:block">
+              <div className="sticky top-32 rounded-[2rem] border border-white/70 bg-white/40 p-5 shadow-sm backdrop-blur-2xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#844D63]">
+                  Steps
+                </p>
+                <div className="mt-5 space-y-4">
+                  {products.map((product, index) => (
+                    <div key={`${product.step}-nav`} className="flex gap-3">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#ead5dd] text-xs font-bold text-[#844D63]">
+                        {index + 1}
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-[#151712]">
+                          {product.step}
+                        </p>
+                        <p className="text-xs text-[#8b8a7f]">
+                          {product.brand}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#844D63]">
+                    Recommended products
+                  </p>
+                  <h2 className="mt-2 text-3xl font-semibold">
+                    Your step-by-step routine.
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate("/quiz")}
+                  className="w-fit rounded-full border border-white/75 bg-white/60 px-5 py-3 text-sm font-semibold uppercase tracking-wide text-[#844D63] shadow-sm backdrop-blur-xl transition hover:bg-white"
+                >
+                  Retake quiz
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                {products.map((p) => (
+                  <ProductStepCard key={`${p.step}-${p.product_id}`} product={p} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {error && (
+            <p className="mt-5 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
+              {error}
+            </p>
+          )}
+
+          <div className="mt-8 rounded-[2.5rem] border border-white/70 bg-white/45 p-5 shadow-xl shadow-black/5 backdrop-blur-2xl md:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving || saved || !!savedRoutineId}
+                className="flex-1 rounded-full bg-[#151712]/90 px-6 py-4 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#303326] disabled:opacity-50"
+              >
+                {saved || savedRoutineId
+                  ? "Routine saved"
+                  : saving
+                    ? "Saving..."
+                    : "Save routine"}
+              </button>
+              <Link
+                to="/dashboard"
+                className="flex-1 rounded-full border border-white/80 bg-white/65 px-6 py-4 text-center text-sm font-semibold uppercase tracking-wide text-[#844D63] shadow-sm transition hover:bg-white"
+              >
+                View dashboard
+              </Link>
+            </div>
+          </div>
         </div>
-
-        {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
-
-        <div className="mt-10 flex flex-col sm:flex-row gap-3">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving || saved}
-            className="flex-1 py-4 bg-gray-900 text-white rounded-2xl font-semibold hover:bg-gray-800 disabled:opacity-50 transition"
-          >
-            {saved ? "✓ Routine Saved" : saving ? "Saving…" : "Save Routine"}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/quiz")}
-            className="flex-1 py-4 border border-gray-200 bg-white text-gray-700 rounded-2xl font-medium hover:bg-gray-50 transition"
-          >
-            Back to Quiz
-          </button>
-        </div>
-
-        {saved && (
-          <p className="text-center text-sm text-gray-400 mt-4">
-            <Link to="/dashboard" className="text-purple-600 hover:underline">
-              View on Dashboard →
-            </Link>
-          </p>
-        )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
+
