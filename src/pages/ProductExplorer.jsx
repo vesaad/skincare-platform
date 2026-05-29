@@ -4,6 +4,32 @@ import { setProducts, setLoading } from "../store/slices/productsSlice";
 import api from "../services/api";
 import ProductCard from "../components/ProductCard";
 
+const categories = ["Serum", "Moisturizer", "Cleanser", "Sunscreen", "Toner"];
+
+const skinTypes = [
+  { label: "Oily", value: "Oily" },
+  { label: "Dry", value: "Dry" },
+  { label: "Combination", value: "Combination" },
+  { label: "Normal", value: "Normal" },
+  { label: "Sensitive", value: "Sensitive" },
+];
+
+const brands = [
+  "LuxuryGlow",
+  "DermaCare",
+  "ClinicalSkin",
+  "InfluenceX",
+  "BudgetBeauty",
+];
+
+const categoryStyles = {
+  Cleanser: "border-[#b9dadd] bg-[#e4f1f3] text-[#3d7880]",
+  Moisturizer: "border-[#d9b9c6] bg-[#ead5dd] text-[#844D63]",
+  Serum: "border-[#d5bfd5] bg-[#e8dce8] text-[#775171]",
+  Sunscreen: "border-[#dcc49f] bg-[#efe0cb] text-[#9a6a35]",
+  Toner: "border-[#c3d8d0] bg-[#dfe9e5] text-[#557368]",
+};
+
 export default function ProductExplorer() {
   const dispatch = useDispatch();
   const { list, loading, total } = useSelector((s) => s.products);
@@ -12,40 +38,12 @@ export default function ProductExplorer() {
   const [filters, setFilters] = useState({});
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const categories = [
-    "Serum",
-    "Moisturizer",
-    "Cleanser",
-    "Sunscreen",
-    "Toner",
-  ];
-  const skinTypes = [
-  { label: "Yndyrore", value: "Oily" },
-  { label: "E thatë", value: "Dry" },
-  { label: "Mikse", value: "Combination" },
-  { label: "Normale", value: "Normal" },
-  { label: "E ndjeshme", value: "Sensitive" },
-];
-  const brands = [
-    "LuxuryGlow",
-    "DermaCare",
-    "ClinicalSkin",
-    "InfluenceX",
-    "BudgetBeauty",
-  ];
   const pageSize = 12;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
     .filter((pageNumber) => Math.abs(pageNumber - page) <= 1)
     .slice(0, 3);
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
-  const categoryStyles = {
-    Cleanser: "bg-sky-50 text-sky-600 border-sky-100",
-    Moisturizer: "bg-pink-50 text-pink-600 border-pink-100",
-    Serum: "bg-purple-50 text-purple-600 border-purple-100",
-    Sunscreen: "bg-amber-50 text-amber-600 border-amber-100",
-    Toner: "bg-emerald-50 text-emerald-600 border-emerald-100",
-  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -66,22 +64,33 @@ export default function ProductExplorer() {
         dispatch(setLoading(false));
       }
     };
+
     const timeout = setTimeout(fetchProducts, 300);
     return () => clearTimeout(timeout);
-  }, [page, search, filters]);
+  }, [page, search, filters, dispatch]);
+
+  useEffect(() => {
+    if (!loading && page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [loading, page, totalPages]);
 
   const toggleFilter = (key, value) => {
-    console.log('toggleFilter:', key, value);
-    setFilters((f) => {
-      const current = { ...f };
-      if (current[key] === value) {
-        delete current[key];
+    setFilters((currentFilters) => {
+      const nextFilters = { ...currentFilters };
+      if (nextFilters[key] === value) {
+        delete nextFilters[key];
       } else {
-        current[key] = value;
+        nextFilters[key] = value;
       }
-      console.log('new filters:', current);
-      return current;
+      return nextFilters;
     });
+    setPage(1);
+  };
+
+  const resetFilters = () => {
+    setFilters({});
+    setSearch("");
     setPage(1);
   };
 
@@ -115,7 +124,9 @@ export default function ProductExplorer() {
           ? ingredientList.join(", ")
           : "skin-supporting ingredients",
       benefitText,
-      benefitChips: ingredientList.map((ingredient) => chips[ingredient]).filter(Boolean),
+      benefitChips: ingredientList
+        .map((ingredient) => chips[ingredient])
+        .filter(Boolean),
     };
   };
 
@@ -166,341 +177,352 @@ export default function ProductExplorer() {
     ? getProductDetails(selectedProduct)
     : null;
 
-  useEffect(() => {
-    if (!loading && page > totalPages) {
-      setPage(totalPages);
-    }
-  }, [loading, page, totalPages]);
-
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className="w-60 flex-shrink-0 border-r border-pink-100 bg-gradient-to-b from-white via-pink-50/40 to-white p-6">
-        <div className="mb-5 flex items-center justify-between">
-          <p className="text-xs font-bold uppercase tracking-wider text-pink-500">
-            Filtrat
-          </p>
-          {activeFilterCount > 0 && (
-            <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-600">
-              {activeFilterCount}
-            </span>
-          )}
-        </div>
-
-        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-          Kategoria
-        </p>
-        <div className="flex flex-col gap-2 mb-6">
-          {categories.map((c) => (
-            <label
-              key={c}
-              className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition ${
-                filters.category === c
-                  ? categoryStyles[c] || "border-purple-100 bg-purple-50 text-purple-600"
-                  : "border-transparent bg-white/70 text-gray-600 hover:border-pink-100 hover:bg-white"
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={filters.category === c}
-                onChange={() => toggleFilter("category", c)}
-                className="accent-purple-500"
-              />
-              <span className="text-sm font-medium">{c}</span>
-            </label>
-          ))}
-        </div>
-
-        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-          Lloji i lëkurës
-        </p>
-        <div className="flex flex-col gap-2 mb-6">
-          {skinTypes.map((s) => (
-  <label
-    key={s.value}
-    className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition ${
-      filters.skinType === s
-        ? "border-pink-100 bg-pink-50 text-pink-600"
-        : "border-transparent bg-white/70 text-gray-600 hover:border-pink-100 hover:bg-white"
-    }`}
-  >
-    <input
-      type="checkbox"
-      checked={filters.skinType === s.value}
-      onChange={() => toggleFilter("skinType", s.value)}
-      className="accent-purple-500"
-    />
-    <span className="text-sm font-medium">{s.label}</span>
-  </label>
-))}
-        </div>
-
-        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
-          Marka
-        </p>
-        <div className="flex flex-col gap-2">
-          {brands.map((b) => (
-            <label
-              key={b}
-              className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 transition ${
-                filters.brand === b
-                  ? "border-purple-100 bg-purple-50 text-purple-600"
-                  : "border-transparent bg-white/70 text-gray-600 hover:border-pink-100 hover:bg-white"
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={filters.brand === b}
-                onChange={() => toggleFilter("brand", b)}
-                className="accent-purple-500"
-              />
-              <span className="text-sm font-medium">{b}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="relative flex-1 max-w-xl">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-              🔍
-            </span>
-            <input
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              placeholder="Kërko produkte..."
-              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
-            />
-          </div>
-          <p className="text-sm text-gray-400 ml-4">
-            Duke shfaqur {list.length} nga {total} produkte
-          </p>
-        </div>
-
-        {Object.values(filters).some((v) => v) && (
-          <div className="flex gap-2 mb-4 flex-wrap">
-            {Object.entries(filters).map(([k, v]) =>
-              v ? (
-                <span
-                  key={k}
-                  className="flex items-center gap-1 bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-xs font-medium"
-                >
-                  {typeof v === 'string' ? v : v?.label || v?.value || ''}
-                  <button onClick={() => toggleFilter(k, v)}>×</button>
-                </span>
-              ) : null,
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                setFilters({});
-                setSearch("");
-                setPage(1);
-              }}
-              className="rounded-full border border-pink-100 bg-white px-3 py-1 text-xs font-medium text-pink-500 hover:bg-pink-50"
-            >
-              Clear all
-            </button>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-purple-400 text-lg">Duke u ngarkuar...</div>
-          </div>
-        ) : list.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {list.map((p) => (
-              <ProductCard
-                key={p.id}
-                product={p}
-                onSelect={setSelectedProduct}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex min-h-80 items-center justify-center rounded-2xl border border-dashed border-pink-200 bg-white/70 p-8 text-center">
-            <div>
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-pink-50 text-2xl font-bold text-pink-500">
-                ?
+    <main className="min-h-screen bg-[#f7f3ec] text-[#151712]">
+      <section className="relative px-4 py-8 md:px-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_6%,rgba(132,77,99,0.14),transparent_30%),radial-gradient(circle_at_92%_10%,rgba(184,146,95,0.16),transparent_28%),linear-gradient(135deg,#fbf8f4_0%,#f7f3ec_55%,#efe7df_100%)]" />
+        <div className="relative mx-auto max-w-7xl">
+          <div className="mb-6 rounded-[3rem] border border-white/70 bg-white/45 p-6 shadow-2xl shadow-[#8b7a6d]/15 backdrop-blur-2xl md:p-8">
+            <div className="grid gap-6 lg:grid-cols-[1fr_0.45fr] lg:items-end">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#844D63]">
+                  Product explorer
+                </p>
+                <h1 className="mt-3 text-4xl font-semibold leading-tight md:text-6xl">
+                  Browse skincare with clarity.
+                </h1>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-[#62665d]">
+                  Search by brand, category, and skin type, then open each
+                  product for a clearer explanation of ingredients and fit.
+                </p>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                No products match these filters
-              </h3>
-              <p className="mt-2 max-w-sm text-sm leading-6 text-gray-500">
-                Try removing a filter or searching with a different product,
-                brand, or ingredient.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setFilters({});
-                  setSearch("");
-                  setPage(1);
-                }}
-                className="mt-5 rounded-lg bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600"
-              >
-                Reset filters
-              </button>
+              <div className="rounded-[2rem] border border-white/75 bg-white/55 p-5 shadow-sm backdrop-blur-xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#844D63]">
+                  Showing
+                </p>
+                <p className="mt-2 text-3xl font-semibold">
+                  {list.length} / {total}
+                </p>
+                <p className="mt-1 text-sm text-[#8b8a7f]">products found</p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3 lg:flex-row">
+              <div className="relative flex-1">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold uppercase tracking-[0.14em] text-[#844D63]">
+                  Search
+                </span>
+                <input
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setPage(1);
+                  }}
+                  placeholder="Search products, brands, ingredients..."
+                  className="w-full rounded-full border border-white/80 bg-white/70 py-4 pl-24 pr-5 text-sm text-[#151712] shadow-sm outline-none backdrop-blur-xl placeholder:text-[#aaa397] focus:border-[#844D63] focus:ring-4 focus:ring-[#ead5dd]/60"
+                />
+              </div>
+              {(activeFilterCount > 0 || search) && (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="rounded-full border border-white/80 bg-white/65 px-6 py-4 text-sm font-semibold uppercase tracking-wide text-[#844D63] shadow-sm transition hover:bg-white"
+                >
+                  Clear all
+                </button>
+              )}
             </div>
           </div>
-        )}
 
-        <div className="flex gap-2 mt-8 justify-center items-center">
-          <button
-            type="button"
-            onClick={() => setPage(1)}
-            disabled={page === 1}
-            className="h-9 rounded-lg border border-pink-100 bg-white px-3 text-xs font-semibold text-pink-500 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Shko prap ne fillim
-          </button>
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            ←
-          </button>
-          {pageNumbers.map((n) => (
-            <button
-              key={n}
-              onClick={() => setPage(n)}
-              className={`w-9 h-9 rounded-lg text-sm font-medium ${page === n ? "bg-purple-500 text-white" : "border border-gray-200 text-gray-500 hover:bg-gray-100"}`}
-            >
-              {n}
-            </button>
-          ))}
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            →
-          </button>
-          <button
-            type="button"
-            onClick={() => setPage(totalPages)}
-            disabled={page === totalPages}
-            className="h-9 rounded-lg border border-purple-100 bg-white px-3 text-xs font-semibold text-purple-500 hover:bg-purple-50 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Faqja e fundit
-          </button>
+          <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+            <aside className="h-fit rounded-[2.5rem] border border-white/70 bg-white/40 p-5 shadow-xl shadow-black/5 backdrop-blur-2xl lg:sticky lg:top-28">
+              <div className="mb-5 flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#844D63]">
+                  Filters
+                </p>
+                {activeFilterCount > 0 && (
+                  <span className="rounded-full bg-[#ead5dd] px-3 py-1 text-xs font-semibold text-[#844D63]">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </div>
+
+              <FilterGroup
+                title="Category"
+                items={categories.map((value) => ({ label: value, value }))}
+                activeValue={filters.category}
+                onToggle={(value) => toggleFilter("category", value)}
+              />
+              <FilterGroup
+                title="Skin type"
+                items={skinTypes}
+                activeValue={filters.skinType}
+                onToggle={(value) => toggleFilter("skinType", value)}
+              />
+              <FilterGroup
+                title="Brand"
+                items={brands.map((value) => ({ label: value, value }))}
+                activeValue={filters.brand}
+                onToggle={(value) => toggleFilter("brand", value)}
+                last
+              />
+            </aside>
+
+            <div>
+              {Object.values(filters).some(Boolean) && (
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {Object.entries(filters).map(([key, value]) =>
+                    value ? (
+                      <span
+                        key={key}
+                        className="flex items-center gap-2 rounded-full bg-white/75 px-3 py-2 text-xs font-semibold text-[#844D63] ring-1 ring-white/80"
+                      >
+                        {value}
+                        <button onClick={() => toggleFilter(key, value)}>x</button>
+                      </span>
+                    ) : null,
+                  )}
+                </div>
+              )}
+
+              {loading ? (
+                <div className="flex h-80 items-center justify-center rounded-[2.5rem] border border-white/70 bg-white/45 shadow-xl shadow-black/5 backdrop-blur-2xl">
+                  <div className="text-lg font-semibold text-[#844D63]">
+                    Loading products...
+                  </div>
+                </div>
+              ) : list.length > 0 ? (
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                  {list.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onSelect={setSelectedProduct}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex min-h-80 items-center justify-center rounded-[2.5rem] border border-dashed border-[#d9b9c6] bg-white/55 p-8 text-center shadow-xl shadow-black/5 backdrop-blur-2xl">
+                  <div>
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#ead5dd] text-2xl font-bold text-[#844D63]">
+                      ?
+                    </div>
+                    <h3 className="text-lg font-semibold text-[#151712]">
+                      No products match these filters
+                    </h3>
+                    <p className="mt-2 max-w-sm text-sm leading-6 text-[#62665d]">
+                      Try removing a filter or searching with a different
+                      product, brand, or ingredient.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={resetFilters}
+                      className="mt-5 rounded-full bg-[#151712]/90 px-5 py-3 text-sm font-semibold uppercase tracking-wide text-white hover:bg-[#303326]"
+                    >
+                      Reset filters
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage(1)}
+                  disabled={page === 1}
+                  className="h-11 rounded-full border border-white/80 bg-white/65 px-4 text-xs font-semibold uppercase tracking-wide text-[#844D63] hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  First page
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/80 bg-white/65 text-[#844D63] hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  &lt;
+                </button>
+                {pageNumbers.map((number) => (
+                  <button
+                    key={number}
+                    onClick={() => setPage(number)}
+                    className={`h-11 w-11 rounded-full text-sm font-semibold ${
+                      page === number
+                        ? "bg-[#844D63] text-white shadow-lg shadow-[#844D63]/20"
+                        : "border border-white/80 bg-white/65 text-[#844D63] hover:bg-white"
+                    }`}
+                  >
+                    {number}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-white/80 bg-white/65 text-[#844D63] hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  &gt;
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage(totalPages)}
+                  disabled={page === totalPages}
+                  className="h-11 rounded-full border border-white/80 bg-white/65 px-4 text-xs font-semibold uppercase tracking-wide text-[#844D63] hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Last page
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       {selectedProduct && selectedDetails && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="product-detail-title"
-          onClick={() => setSelectedProduct(null)}
-        >
-          <div
-            className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-xl"
-            onClick={(e) => e.stopPropagation()}
+        <ProductModal
+          product={selectedProduct}
+          details={selectedDetails}
+          onClose={() => setSelectedProduct(null)}
+          categoryStyles={categoryStyles}
+        />
+      )}
+    </main>
+  );
+}
+
+function FilterGroup({ title, items, activeValue, onToggle, last = false }) {
+  return (
+    <div className={last ? "" : "mb-6"}>
+      <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#62665d]">
+        {title}
+      </p>
+      <div className="flex flex-col gap-2">
+        {items.map((item) => (
+          <label
+            key={item.value}
+            className={`flex cursor-pointer items-center gap-3 rounded-2xl border px-3 py-3 transition ${
+              activeValue === item.value
+                ? "border-[#844D63] bg-white text-[#844D63] shadow-sm"
+                : "border-white/70 bg-white/55 text-[#62665d] hover:bg-white"
+            }`}
           >
-            <div className="grid gap-0 md:grid-cols-[240px_1fr]">
-              <div className="relative flex min-h-64 items-center justify-center bg-gray-50 p-6">
-                {selectedProduct.imageUrl ? (
-                  <img
-                    src={selectedProduct.imageUrl}
-                    alt={selectedProduct.name}
-                    className="max-h-56 w-full object-contain"
-                  />
-                ) : (
-                  <div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-purple-50 text-4xl font-bold text-purple-600">
-                    {selectedProduct.name?.[0] || "?"}
-                  </div>
-                )}
-                <span
-                  className={`absolute left-4 top-4 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm ${
-                    categoryStyles[selectedDetails.category] ||
-                    "border-purple-100 bg-purple-50 text-purple-600"
-                  }`}
-                >
-                  {selectedDetails.category}
-                </span>
+            <input
+              type="checkbox"
+              checked={activeValue === item.value}
+              onChange={() => onToggle(item.value)}
+              className="accent-[#844D63]"
+            />
+            <span className="text-sm font-medium">{item.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProductModal({ product, details, onClose, categoryStyles }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#151712]/45 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="product-detail-title"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-3xl overflow-hidden rounded-[2.5rem] border border-white/80 bg-[#fbf8f4]/95 shadow-2xl shadow-black/20 backdrop-blur-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="grid gap-0 md:grid-cols-[280px_1fr]">
+          <div className="relative flex min-h-80 items-center justify-center bg-white/55 p-8">
+            {product.imageUrl ? (
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="max-h-64 w-full object-contain"
+              />
+            ) : (
+              <div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-[#ead5dd] text-4xl font-bold text-[#844D63]">
+                {product.name?.[0] || "?"}
               </div>
+            )}
+            <span
+              className={`absolute left-5 top-5 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm ${
+                categoryStyles[details.category] ||
+                "border-white/80 bg-white/80 text-[#844D63]"
+              }`}
+            >
+              {details.category}
+            </span>
+          </div>
 
-              <div className="p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                      {selectedDetails.brand}
-                    </p>
-                    <h2
-                      id="product-detail-title"
-                      className="mt-1 text-2xl font-bold text-gray-900"
-                    >
-                      {selectedProduct.name}
-                    </h2>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedProduct(null)}
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-pink-400 hover:bg-pink-50 hover:text-pink-700"
-                    aria-label="Close product details"
-                  >
-                    x
-                  </button>
-                </div>
-
-                <p className="mt-4 text-sm leading-6 text-gray-600">
-                  {selectedDetails.description}
+          <div className="p-7">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#9b948a]">
+                  {details.brand}
                 </p>
-
-                {selectedDetails.benefitChips.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {selectedDetails.benefitChips.map((chip) => (
-                      <span
-                        key={chip}
-                        className="rounded-full border border-pink-100 bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-600"
-                      >
-                        {chip}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
-                  <div className="rounded-lg border border-pink-100 bg-pink-50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-pink-400">
-                      Price
-                    </p>
-                    <p className="mt-1 font-bold text-pink-700">
-                      ${selectedProduct.price}
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-purple-100 bg-purple-50 p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-purple-400">
-                      Category
-                    </p>
-                    <p className="mt-1 font-semibold text-purple-700">
-                      {selectedDetails.category}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                    Ingredients
-                  </p>
-                  <p className="mt-2 text-sm text-gray-700">
-                    {selectedDetails.ingredients}
-                  </p>
-                </div>
+                <h2
+                  id="product-detail-title"
+                  className="mt-2 text-3xl font-semibold text-[#151712]"
+                >
+                  {product.name}
+                </h2>
               </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-[#844D63] hover:bg-white"
+                aria-label="Close product details"
+              >
+                x
+              </button>
+            </div>
+
+            <p className="mt-5 text-sm leading-6 text-[#62665d]">
+              {details.description}
+            </p>
+
+            {details.benefitChips.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {details.benefitChips.map((chip) => (
+                  <span
+                    key={chip}
+                    className="rounded-full border border-[#eadfd9] bg-white/75 px-3 py-1 text-xs font-semibold text-[#844D63]"
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/80 bg-white/65 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#9b948a]">
+                  Price
+                </p>
+                <p className="mt-1 text-lg font-bold text-[#844D63]">
+                  ${product.price}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/80 bg-white/65 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#9b948a]">
+                  Category
+                </p>
+                <p className="mt-1 text-lg font-semibold text-[#844D63]">
+                  {details.category}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#9b948a]">
+                Ingredients
+              </p>
+              <p className="mt-2 text-sm text-[#4d5047]">
+                {details.ingredients}
+              </p>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
