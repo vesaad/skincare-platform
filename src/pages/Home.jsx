@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 const steps = [
@@ -79,7 +79,36 @@ const carouselProducts = [
 
 export default function Home() {
   const [activeProduct, setActiveProduct] = useState(0);
+  const [communityReviews, setCommunityReviews] = useState([]);
+  const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
+  const testimonialCarouselRef = useRef(null);
+  const [reviewForm, setReviewForm] = useState({
+    name: "",
+    role: "",
+    score: "10",
+    quote: "",
+  });
   const product = carouselProducts[activeProduct];
+  const visibleTestimonials = [...testimonials, ...communityReviews];
+
+  useEffect(() => {
+    const savedReviews = window.localStorage.getItem("auraskin-reviews");
+
+    if (savedReviews) {
+      try {
+        setCommunityReviews(JSON.parse(savedReviews));
+      } catch {
+        window.localStorage.removeItem("auraskin-reviews");
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      "auraskin-reviews",
+      JSON.stringify(communityReviews),
+    );
+  }, [communityReviews]);
 
   const nextProduct = () => {
     setActiveProduct((index) => (index + 1) % carouselProducts.length);
@@ -90,6 +119,59 @@ export default function Home() {
       (index) =>
         (index - 1 + carouselProducts.length) % carouselProducts.length,
     );
+  };
+
+  const scrollTestimonials = (direction) => {
+    if (!testimonialCarouselRef.current) {
+      return;
+    }
+
+    testimonialCarouselRef.current.scrollBy({
+      left: direction === "next" ? 420 : -420,
+      behavior: "smooth",
+    });
+  };
+
+  const updateReviewForm = (event) => {
+    const { name, value } = event.target;
+    setReviewForm((currentForm) => ({ ...currentForm, [name]: value }));
+  };
+
+  const submitReview = (event) => {
+    event.preventDefault();
+
+    const name = reviewForm.name.trim();
+    const role = reviewForm.role.trim();
+    const quote = reviewForm.quote.trim();
+
+    if (!name || !role || !quote) {
+      return;
+    }
+
+    setCommunityReviews((currentReviews) => [
+      ...currentReviews,
+      {
+        id: Date.now(),
+        name,
+        role,
+        quote,
+        score: `${reviewForm.score}/10`,
+        initials: name
+          .split(" ")
+          .map((part) => part[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase(),
+      },
+    ]);
+
+    setReviewForm({
+      name: "",
+      role: "",
+      score: "10",
+      quote: "",
+    });
+    setIsReviewFormOpen(false);
   };
 
   return (
@@ -173,27 +255,63 @@ export default function Home() {
 
       <section className="px-4 py-16 md:px-8">
         <div className="mx-auto max-w-6xl rounded-[2.5rem] border border-white/70 bg-white/45 p-6 shadow-xl shadow-black/5 backdrop-blur-2xl md:p-10">
-          <div className="mb-10 text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#844D63]">
-              Community proof
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold md:text-5xl">
-              What our community is saying.
-            </h2>
+          <div className="mb-10 flex flex-col gap-5 text-center md:flex-row md:items-end md:justify-between md:text-left">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#844D63]">
+                Community proof
+              </p>
+              <h2 className="mt-3 text-3xl font-semibold md:text-5xl">
+                What our community is saying.
+              </h2>
+            </div>
+            <div className="mx-auto flex items-center gap-3 md:mx-0">
+              <button
+                type="button"
+                onClick={() => scrollTestimonials("previous")}
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/70 bg-white/65 text-xl text-[#844D63] shadow-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white"
+                aria-label="Previous reviews"
+              >
+                &lt;
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollTestimonials("next")}
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/70 bg-white/65 text-xl text-[#844D63] shadow-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white"
+                aria-label="Next reviews"
+              >
+                &gt;
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsReviewFormOpen(true)}
+                className="rounded-full border border-white/70 bg-white/65 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-[#844D63] shadow-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white"
+              >
+                Write a review
+              </button>
+            </div>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
-            {testimonials.map((review) => (
+          <div
+            ref={testimonialCarouselRef}
+            className="flex snap-x gap-5 overflow-x-auto scroll-smooth pb-3"
+          >
+            {visibleTestimonials.map((review) => (
               <article
-                key={review.name}
-                className="rounded-[1.75rem] border border-white/80 bg-white/70 p-5 shadow-sm backdrop-blur"
+                key={review.id || review.name}
+                className="min-h-64 w-[82vw] shrink-0 snap-start rounded-[1.75rem] border border-white/80 bg-white/70 p-5 shadow-sm backdrop-blur sm:w-[420px]"
               >
                 <div className="flex items-center gap-4">
-                  <img
-                    src={review.photo}
-                    alt={`${review.name} customer`}
-                    className="h-14 w-14 rounded-2xl object-cover"
-                  />
+                  {review.photo ? (
+                    <img
+                      src={review.photo}
+                      alt={`${review.name} customer`}
+                      className="h-14 w-14 rounded-2xl object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ead5dd] to-[#f7efe2] text-sm font-bold text-[#844D63] shadow-inner">
+                      {review.initials}
+                    </div>
+                  )}
                   <div>
                     <p className="font-semibold text-[#151712]">
                       {review.name}
@@ -210,6 +328,106 @@ export default function Home() {
               </article>
             ))}
           </div>
+
+          {isReviewFormOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#151712]/35 px-4 py-8 backdrop-blur-sm">
+              <form
+                onSubmit={submitReview}
+                className="w-full max-w-2xl rounded-[2.25rem] border border-white/80 bg-[#fbf8f4]/90 p-5 shadow-2xl shadow-black/20 backdrop-blur-2xl md:p-7"
+              >
+                <div className="mb-6 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#844D63]">
+                      Add your review
+                    </p>
+                    <h3 className="mt-2 text-3xl font-semibold">
+                      Share your glow story.
+                    </h3>
+                    <p className="mt-3 text-sm leading-6 text-[#6d6c63]">
+                      Your review appears instantly and stays saved on this
+                      device.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsReviewFormOpen(false)}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/80 bg-white/70 text-xl leading-none text-[#844D63] shadow-sm transition hover:bg-white"
+                    aria-label="Close review form"
+                  >
+                    x
+                  </button>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-[1fr_1fr_130px]">
+                  <label className="text-sm font-medium text-[#4d5047]">
+                    Name
+                    <input
+                      name="name"
+                      value={reviewForm.name}
+                      onChange={updateReviewForm}
+                      placeholder="Your name"
+                      required
+                      className="mt-2 w-full rounded-2xl border border-[#eadfd9] bg-white/80 px-4 py-3 text-[#151712] outline-none transition placeholder:text-[#aaa397] focus:border-[#844D63] focus:ring-4 focus:ring-[#ead5dd]/60"
+                    />
+                  </label>
+                  <label className="text-sm font-medium text-[#4d5047]">
+                    Skin type
+                    <input
+                      name="role"
+                      value={reviewForm.role}
+                      onChange={updateReviewForm}
+                      placeholder="Dry skin..."
+                      required
+                      className="mt-2 w-full rounded-2xl border border-[#eadfd9] bg-white/80 px-4 py-3 text-[#151712] outline-none transition placeholder:text-[#aaa397] focus:border-[#844D63] focus:ring-4 focus:ring-[#ead5dd]/60"
+                    />
+                  </label>
+                  <label className="text-sm font-medium text-[#4d5047]">
+                    Rating
+                    <select
+                      name="score"
+                      value={reviewForm.score}
+                      onChange={updateReviewForm}
+                      className="mt-2 w-full rounded-2xl border border-[#eadfd9] bg-white/80 px-4 py-3 text-[#151712] outline-none transition focus:border-[#844D63] focus:ring-4 focus:ring-[#ead5dd]/60"
+                    >
+                      <option value="10">10/10</option>
+                      <option value="9">9/10</option>
+                      <option value="8">8/10</option>
+                      <option value="7">7/10</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label className="mt-4 block text-sm font-medium text-[#4d5047]">
+                  Review
+                  <textarea
+                    name="quote"
+                    value={reviewForm.quote}
+                    onChange={updateReviewForm}
+                    placeholder="Tell us what helped, what felt easy, or what you liked."
+                    rows="4"
+                    required
+                    className="mt-2 w-full resize-none rounded-2xl border border-[#eadfd9] bg-white/80 px-4 py-3 text-[#151712] outline-none transition placeholder:text-[#aaa397] focus:border-[#844D63] focus:ring-4 focus:ring-[#ead5dd]/60"
+                  />
+                </label>
+
+                <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setIsReviewFormOpen(false)}
+                    className="rounded-full border border-white/80 bg-white/65 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-[#844D63] shadow-sm transition hover:bg-white"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="rounded-full bg-[#151712]/90 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#303326]"
+                  >
+                    Add review
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       </section>
 
