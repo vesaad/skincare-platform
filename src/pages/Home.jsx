@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const steps = [
   {
@@ -78,6 +79,7 @@ const carouselProducts = [
 ];
 
 export default function Home() {
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const [activeProduct, setActiveProduct] = useState(0);
   const [communityReviews, setCommunityReviews] = useState([]);
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
@@ -137,8 +139,23 @@ export default function Home() {
     setReviewForm((currentForm) => ({ ...currentForm, [name]: value }));
   };
 
+  const openReviewForm = () => {
+    if (!isAuthenticated) {
+      window.location.href = "/login";
+      return;
+    }
+
+    setIsReviewFormOpen(true);
+  };
+
   const submitReview = (event) => {
     event.preventDefault();
+
+    if (!isAuthenticated) {
+      setIsReviewFormOpen(false);
+      window.location.href = "/login";
+      return;
+    }
 
     const name = reviewForm.name.trim();
     const role = reviewForm.role.trim();
@@ -283,7 +300,7 @@ export default function Home() {
               </button>
               <button
                 type="button"
-                onClick={() => setIsReviewFormOpen(true)}
+                onClick={openReviewForm}
                 className="rounded-full border border-white/70 bg-white/65 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-[#844D63] shadow-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white"
               >
                 Write a review
