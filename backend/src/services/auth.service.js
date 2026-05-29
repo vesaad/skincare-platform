@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const authRepo = require('../repositories/auth.repository');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 const generateTokens = (user) => {
   const accessToken = jwt.sign(
@@ -43,10 +45,24 @@ const login = async ({ email, password }) => {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new Error('Email ose fjalëkalim i gabuar');
 
+  // Merr rolin nga UserRole
+  const userWithRole = await prisma.user.findUnique({
+    where: { id: user.id },
+    include: {
+      userRoles: {
+        include: { role: true }
+      }
+    }
+  });
+
+  const roleName = userWithRole.userRoles?.[0]?.role?.name || 'User';
+  
+  // Shto rolin në user object para generateTokens
+  user.role = roleName;
+
   const { accessToken, refreshToken } = generateTokens(user);
 
-  // Ruaj refresh token në DB
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 ditë
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
   await authRepo.saveRefreshToken(user.id, tokenHash, expiresAt);
 
@@ -56,7 +72,8 @@ const login = async ({ email, password }) => {
     user: {
       id: user.id,
       email: user.email,
-      firstName: user.firstName
+      firstName: user.firstName,
+      role: roleName
     }
   };
 };

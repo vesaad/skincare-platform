@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/slices/authSlice";
 
 export default function Navbar() {
-  const { isAuthenticated } = useSelector((s) => s.auth);
+  const { isAuthenticated, user } = useSelector((s) => s.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,12 +27,8 @@ export default function Navbar() {
             />
           </span>
           <span className="ml-3 hidden leading-tight sm:block">
-            <span className="block text-base font-semibold text-[#151712]">
-              AuraSkin
-            </span>
-            <span className="block text-xs font-medium text-[#844D63]">
-              Personalized Skincare
-            </span>
+            <span className="block text-base font-semibold text-[#151712]">AuraSkin</span>
+            <span className="block text-xs font-medium text-[#844D63]">Personalized Skincare</span>
           </span>
         </Link>
       </div>
@@ -50,6 +46,7 @@ export default function Navbar() {
         >
           Take Quiz
         </Link>
+
         {isAuthenticated ? (
           <>
             <Link
@@ -64,6 +61,16 @@ export default function Navbar() {
             >
               Dashboard
             </Link>
+
+            {user?.role === 'Admin' && (
+              <Link
+                to="/admin"
+                className={`hidden rounded-full px-4 py-2 text-sm font-medium transition lg:inline-flex ${isActive("/admin") ? "bg-[#844D63] text-white shadow-sm" : "text-[#844D63] hover:bg-white/70"}`}
+              >
+                Admin Panel
+              </Link>
+            )}
+
             <button
               onClick={handleLogout}
               className="ml-2 px-4 py-2 rounded-lg text-sm font-medium bg-red-50 text-red-500 hover:bg-red-100 transition"
