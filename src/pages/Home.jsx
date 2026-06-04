@@ -234,7 +234,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-4 py-16 md:px-8">
+      <section className="px-4 pb-8 pt-16 md:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
@@ -260,7 +260,7 @@ export default function Home() {
                 <p className="text-sm font-semibold text-[#B8925F]">
                   {step.number}
                 </p>
-                <h3 className="mt-5 text-xl font-semibold">{step.title}</h3>
+                <h3 className="mt-5 text-2xl font-semibold">{step.title}</h3>
                 <p className="mt-3 text-sm leading-6 text-[#65675f]">
                   {step.text}
                 </p>
@@ -270,7 +270,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-4 py-16 md:px-8">
+      <section className="px-4 pb-4 pt-4 md:px-8">
         <div className="mx-auto max-w-6xl rounded-[2.5rem] border border-white/70 bg-white/45 p-6 shadow-xl shadow-black/5 backdrop-blur-2xl md:p-10">
           <div className="mb-10 flex flex-col gap-5 text-center md:flex-row md:items-end md:justify-between md:text-left">
             <div>
@@ -448,7 +448,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-4 py-16 md:px-8">
+      <section className="px-4 pb-16 pt-4 md:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
