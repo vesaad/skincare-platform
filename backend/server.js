@@ -20,7 +20,7 @@ app.use("/api/auth", require("./src/routes/auth.routes"));
 app.use("/api/auth", require("./src/routes/auth.routes"));
 app.use(
   "/images",
-  require("express").static(require("path").join(__dirname, "public/images")),
+ require("express").static(require("path").join(__dirname, "../public/images")),
 );
 app.use("/api/brands", require("./src/routes/brand.routes"));
 app.use("/api/ingredients", require("./src/routes/ingredient.routes"));

@@ -81,7 +81,7 @@ export default function ProductCard({ product, onSelect }) {
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="h-full w-full object-contain p-5 transition duration-300 group-hover:scale-105"
+            className="h-full w-full bg-transparent object-contain p-5 mix-blend-multiply transition duration-300 group-hover:scale-105"
             onError={(e) => {
               e.target.onerror = null;
               e.target.parentNode.innerHTML = `

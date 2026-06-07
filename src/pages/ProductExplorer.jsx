@@ -131,8 +131,6 @@ export default function ProductExplorer() {
   };
 
   const buildProductDescription = (product, brand, category) => {
-    if (product.description) return product.description;
-
     const { ingredients, benefitText } = describeIngredients(product.ingredients);
     const categoryDescriptions = {
       Cleanser:
