@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { setRoutine, setProfile, setLoading } from "../store/slices/routineSlice";
+import { resetRoutine, setRoutine, setProfile, setLoading, setSavedRoutineId } from "../store/slices/routineSlice";
 
 const AGE_OPTIONS = [
   { label: "Under 18", value: 16 },
@@ -125,6 +125,8 @@ const questions = [
 export default function Quiz() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isRetake = new URLSearchParams(location.search).get("retake") === "1";
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -147,6 +149,26 @@ export default function Quiz() {
   const currentQuestion = questions[step];
   const progress = ((step + 1) / questions.length) * 100;
   const isFinalStep = step === questions.length - 1;
+
+  useEffect(() => {
+    if (isRetake) {
+      dispatch(resetRoutine());
+      return;
+    }
+
+    const loadExistingRoutine = async () => {
+      try {
+        const res = await api.get("/routines/active");
+        if (res.data) {
+          navigate("/routine", { replace: true });
+        }
+      } catch {
+        /* No saved routine yet, so the quiz should be shown. */
+      }
+    };
+
+    loadExistingRoutine();
+  }, [dispatch, isRetake, navigate]);
 
   const goNext = () => {
     setStep((currentStep) => Math.min(currentStep + 1, questions.length - 1));
@@ -189,6 +211,9 @@ export default function Quiz() {
       const res = await api.post("/assessment", payload);
       dispatch(setProfile({ ...answers, ...payload }));
       dispatch(setRoutine(res.data));
+      if (res.data.routineId) {
+        dispatch(setSavedRoutineId(res.data.routineId));
+      }
       navigate("/routine");
     } catch (err) {
       setError(
