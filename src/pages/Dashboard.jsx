@@ -51,8 +51,9 @@ function MetricTile({ label, value, helper }) {
 
 export default function Dashboard() {
   const { user } = useSelector((s) => s.auth);
-  const { data: routine, profile, savedRoutineId } = useSelector((s) => s.routine);
+  const { profile, savedRoutineId } = useSelector((s) => s.routine);
   const [activeRoutine, setActiveRoutine] = useState(null);
+  const [activeRoutineUserId, setActiveRoutineUserId] = useState(null);
   const [logs, setLogs] = useState([]);
   const [rating, setRating] = useState(5);
   const [notes, setNotes] = useState("");
@@ -61,7 +62,10 @@ export default function Dashboard() {
   );
   const [savingLog, setSavingLog] = useState(false);
 
-  const routineId = savedRoutineId || activeRoutine?.id;
+  const visibleActiveRoutine =
+    activeRoutineUserId === user?.id ? activeRoutine : null;
+  const visibleLogs = activeRoutineUserId === user?.id ? logs : [];
+  const routineId = visibleActiveRoutine?.id;
 
   useEffect(() => {
     const load = async () => {
@@ -69,47 +73,65 @@ export default function Dashboard() {
         const res = await api.get("/routines/active");
         if (res.data) {
           setActiveRoutine(res.data);
+          setActiveRoutineUserId(user?.id);
           setLogs(res.data.progressLogs || []);
+        } else {
+          setActiveRoutine(null);
+          setActiveRoutineUserId(user?.id);
+          setLogs([]);
         }
       } catch {
-        /* User may not have saved a routine yet. */
+        setActiveRoutine(null);
+        setActiveRoutineUserId(user?.id);
+        setLogs([]);
       }
     };
 
     load();
-  }, [savedRoutineId]);
+  }, [savedRoutineId, user?.id]);
 
   const steps =
-    activeRoutine?.routineSteps?.map((s) => ({
+    visibleActiveRoutine?.routineSteps?.map((s) => ({
       step: s.instructions || s.product?.category,
       name: s.product?.name,
       brand: s.product?.brand,
       price: s.product?.price,
       ingredients: (s.product?.ingredients || "").split("|").filter(Boolean),
-    })) || routine?.products || [];
+    })) || [];
 
   const routineName =
-    activeRoutine?.name || routine?.routine || (steps.length ? "Active Routine" : null);
+    visibleActiveRoutine?.name || (steps.length ? "Active Routine" : null);
+  const serverProfile = visibleActiveRoutine?.profile
+    ? {
+        Age: visibleActiveRoutine.profile.age,
+        Skin_Type: visibleActiveRoutine.profile.skinType,
+        Skin_Tone: visibleActiveRoutine.profile.skinTone,
+        Climate: visibleActiveRoutine.profile.climate,
+        Diet: visibleActiveRoutine.profile.diet,
+        Hormonal_Status: visibleActiveRoutine.profile.hormonalStatus,
+      }
+    : null;
+  const visibleProfile = profile || serverProfile;
 
   const profileEntries = useMemo(
     () =>
-      profile
+      visibleProfile
         ? Object.entries(PROFILE_LABELS)
-            .filter(([key]) => profile[key] != null)
+            .filter(([key]) => visibleProfile[key] != null)
             .map(([key, label]) => ({
               label,
               value:
-                key === "Age" && typeof profile[key] === "number"
-                  ? profile[key]
-                  : String(profile[key]),
+                key === "Age" && typeof visibleProfile[key] === "number"
+                  ? visibleProfile[key]
+                  : String(visibleProfile[key]),
             }))
         : [],
-    [profile],
+    [visibleProfile],
   );
 
   const averageRating =
-    logs.length > 0
-      ? (logs.reduce((sum, log) => sum + (log.rating || 0), 0) / logs.length).toFixed(1)
+    visibleLogs.length > 0
+      ? (visibleLogs.reduce((sum, log) => sum + (log.rating || 0), 0) / visibleLogs.length).toFixed(1)
       : "0.0";
 
   const handleLogProgress = async () => {
@@ -153,7 +175,7 @@ export default function Dashboard() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
-                  to="/quiz"
+                  to="/quiz?retake=1"
                   className="rounded-full bg-[#151712]/90 px-6 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#303326]"
                 >
                   Retake quiz
@@ -201,7 +223,7 @@ export default function Dashboard() {
             />
             <MetricTile
               label="Logs"
-              value={logs.length}
+              value={visibleLogs.length}
               helper="Recent skin check-ins"
             />
           </div>
@@ -358,17 +380,17 @@ export default function Dashboard() {
                     </h3>
                   </div>
                   <span className="rounded-full bg-[#ead5dd] px-4 py-2 text-sm font-semibold text-[#844D63]">
-                    {logs.length}
+                    {visibleLogs.length}
                   </span>
                 </div>
 
                 <div className="mt-5 max-h-[360px] space-y-3 overflow-y-auto pr-1">
-                  {logs.length === 0 ? (
+                  {visibleLogs.length === 0 ? (
                     <div className="rounded-[1.5rem] bg-white/70 p-5 text-sm text-[#62665d]">
                       No check-ins yet. Add your first one on the left.
                     </div>
                   ) : (
-                    logs.map((log) => (
+                    visibleLogs.map((log) => (
                       <div
                         key={log.id}
                         className="grid gap-4 rounded-[1.5rem] border border-white/80 bg-white/80 p-4 sm:grid-cols-[84px_1fr]"
