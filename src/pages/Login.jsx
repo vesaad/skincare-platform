@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { loginSuccess } from "../store/slices/authSlice";
+import { resetRoutine, setSavedRoutineId } from "../store/slices/routineSlice";
 import api from "../services/api";
 
 export default function Login() {
@@ -12,8 +13,20 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       const res = await api.post("/auth/login", data);
+      dispatch(resetRoutine());
       dispatch(loginSuccess(res.data));
-      navigate("/dashboard");
+
+      try {
+        const routineRes = await api.get("/routines/active");
+        if (routineRes.data) {
+          dispatch(setSavedRoutineId(routineRes.data.id));
+          navigate("/routine");
+        } else {
+          navigate("/quiz");
+        }
+      } catch {
+        navigate("/quiz");
+      }
     } catch {
       alert("Email ose fjalekalim i gabuar");
     }

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 import { setSavedRoutineId } from "../store/slices/routineSlice";
 
@@ -214,11 +214,62 @@ export default function Routine() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data, savedRoutineId, profile } = useSelector((s) => s.routine);
+  const [activeRoutine, setActiveRoutine] = useState(null);
+  const [loadingRoutine, setLoadingRoutine] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
 
-  if (!data) {
+  useEffect(() => {
+    const loadActiveRoutine = async () => {
+      try {
+        const res = await api.get("/routines/active");
+        if (res.data) {
+          setActiveRoutine(res.data);
+          dispatch(setSavedRoutineId(res.data.id));
+        }
+      } catch {
+        setActiveRoutine(null);
+      } finally {
+        setLoadingRoutine(false);
+      }
+    };
+
+    loadActiveRoutine();
+  }, [dispatch, savedRoutineId]);
+
+  const serverProducts =
+    activeRoutine?.routineSteps?.map((step) => ({
+      product_id: step.product?.id,
+      step: step.instructions || step.product?.category,
+      name: step.product?.name,
+      brand: step.product?.brand,
+      category: step.product?.category,
+      price: step.product?.price,
+      ingredients: (step.product?.ingredients || "").split("|").filter(Boolean),
+    })) || [];
+
+  const routineData = data || (
+    activeRoutine
+      ? {
+          routine: activeRoutine.name || activeRoutine.type,
+          confidence: 100,
+          products: serverProducts,
+        }
+      : null
+  );
+
+  if (loadingRoutine) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f7f3ec] px-6">
+        <div className="rounded-[2rem] border border-white/70 bg-white/55 p-8 text-center shadow-xl shadow-black/10 backdrop-blur-2xl">
+          <p className="text-sm font-semibold text-[#844D63]">Loading routine...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!routineData) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f7f3ec] px-6">
         <div className="max-w-md rounded-[2.5rem] border border-white/70 bg-white/55 p-8 text-center shadow-2xl shadow-black/10 backdrop-blur-2xl">
@@ -243,12 +294,17 @@ export default function Routine() {
   }
 
   const handleSave = async () => {
+    if (activeRoutine || savedRoutineId || data?.routineId) {
+      setSaved(true);
+      return;
+    }
+
     setSaving(true);
     setError(null);
     try {
       const res = await api.post("/routines", {
-        routineType: data.routine,
-        products: data.products,
+        routineType: routineData.routine,
+        products: routineData.products,
       });
       dispatch(setSavedRoutineId(res.data.id));
       setSaved(true);
@@ -259,9 +315,9 @@ export default function Routine() {
     }
   };
 
-  const products = data.products || [];
-  const routineName = data.routine?.replace(" Routine", "") || "Personalized";
-  const confidence = Math.round(data.confidence || 0);
+  const products = routineData.products || [];
+  const routineName = routineData.routine?.replace(" Routine", "") || "Personalized";
+  const confidence = Math.round(routineData.confidence || 0);
   const totalPrice = products.reduce(
     (sum, product) => sum + Number(product.price || 0),
     0,
@@ -381,7 +437,7 @@ export default function Routine() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => navigate("/quiz")}
+                  onClick={() => navigate("/quiz?retake=1")}
                   className="w-fit rounded-full border border-white/75 bg-white/60 px-5 py-3 text-sm font-semibold uppercase tracking-wide text-[#844D63] shadow-sm backdrop-blur-xl transition hover:bg-white"
                 >
                   Retake quiz
@@ -429,4 +485,3 @@ export default function Routine() {
     </main>
   );
 }
-

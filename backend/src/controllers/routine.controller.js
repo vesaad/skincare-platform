@@ -59,7 +59,16 @@ const getActiveRoutine = async (req, res) => {
       },
       orderBy: { generatedAt: 'desc' },
     });
-    res.json(routine);
+
+    if (!routine) {
+      return res.json(null);
+    }
+
+    const profile = await prisma.skinProfile.findUnique({
+      where: { userId: req.user.userId },
+    });
+
+    res.json({ ...routine, profile });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
