@@ -1,6 +1,7 @@
 import axios from "axios";
 import { store } from "../store";
 import { logout, updateTokens } from "../store/slices/authSlice";
+import { resetRoutine } from "../store/slices/routineSlice";
 
 const baseURL = "http://localhost:3001/api";
 
@@ -36,6 +37,7 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
         return api(originalRequest);
       } catch {
+        store.dispatch(resetRoutine());
         store.dispatch(logout());
       }
     }

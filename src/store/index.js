@@ -11,14 +11,13 @@ const storage = {
   removeItem: (key) => Promise.resolve(localStorage.removeItem(key)),
 };
 
-const routinePersistConfig = { key: "routine", storage };
 const authPersistConfig    = { key: "auth",    storage };
 
 export const store = configureStore({
   reducer: {
     auth:          persistReducer(authPersistConfig, authReducer),
     products:      productsReducer,
-    routine:       persistReducer(routinePersistConfig, routineReducer),
+    routine:       routineReducer,
     notifications: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>

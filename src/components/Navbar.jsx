@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/slices/authSlice";
+import { resetRoutine } from "../store/slices/routineSlice";
 
 export default function Navbar() {
   const { isAuthenticated, user } = useSelector((s) => s.auth);
@@ -9,8 +10,9 @@ export default function Navbar() {
   const location = useLocation();
 
   const handleLogout = () => {
+    dispatch(resetRoutine());
     dispatch(logout());
-    navigate("/");
+    navigate("/login");
   };
 
   const isActive = (path) => location.pathname === path;

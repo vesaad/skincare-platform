@@ -22,9 +22,16 @@ const routineSlice = createSlice({
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
+    resetRoutine: (state) => {
+      state.data = null;
+      state.profile = null;
+      state.savedRoutineId = null;
+      state.loading = false;
+      localStorage.removeItem("persist:routine");
+    },
   },
 });
 
-export const { setRoutine, setProfile, setSavedRoutineId, setLoading } =
+export const { setRoutine, setProfile, setSavedRoutineId, setLoading, resetRoutine } =
   routineSlice.actions;
 export default routineSlice.reducer;
