@@ -11,75 +11,64 @@ export default function Register() {
       await api.post("/auth/register", data);
       navigate("/login");
     } catch {
-      alert("Gabim gjate regjistrimit. Provo serish.");
+      alert("Gabim gjatë regjistrimit — provo sërish");
     }
   };
 
   return (
-    <main className="flex min-h-[calc(100vh-86px)] items-center justify-center bg-[#f7f3ec] px-4 py-10 text-[#151712]">
-      <div className="w-full max-w-md rounded-[2rem] border border-[#eadfd9] bg-white p-6 shadow-lg shadow-[#8b7a6d]/10 md:p-8">
-        <div className="mb-7 text-center">
-          <h1 className="text-3xl font-semibold">Krijo llogari</h1>
-          <p className="mt-2 text-sm text-[#77766d]">
-            Regjistrohu per te krijuar rutinen tende.
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-pink-50">
+      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 w-96 flex flex-col gap-4">
+        <div className="text-center mb-2">
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-400 rounded-xl flex items-center justify-center mx-auto mb-3">
+            <span className="text-white text-xl font-bold">S</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Krijo llogari</h1>
+          <p className="text-gray-400 text-sm mt-1">
+            Fillo udhëtimin tënd të kujdesit
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="text-sm font-medium text-[#4d5047]">
-              Emri
-              <input
-                {...register("firstName")}
-                required
-                className="mt-2 w-full rounded-xl border border-[#ddd4ce] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#844D63] focus:ring-4 focus:ring-[#ead5dd]/60"
-              />
-            </label>
-            <label className="text-sm font-medium text-[#4d5047]">
-              Mbiemri
-              <input
-                {...register("lastName")}
-                required
-                className="mt-2 w-full rounded-xl border border-[#ddd4ce] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#844D63] focus:ring-4 focus:ring-[#ead5dd]/60"
-              />
-            </label>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
+          <div className="flex gap-3">
+            <input
+              {...register("firstName")}
+              placeholder="Emri"
+              className="border border-gray-200 p-3 rounded-xl w-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+            />
+            <input
+              {...register("lastName")}
+              placeholder="Mbiemri"
+              className="border border-gray-200 p-3 rounded-xl w-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+            />
           </div>
+          <input
+            {...register("email")}
+            placeholder="Email"
+            type="email"
+            className="border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+          />
+          <input
+            {...register("password")}
+            placeholder="Fjalëkalim"
+            type="password"
+            className="border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+          />
 
-          <label className="block text-sm font-medium text-[#4d5047]">
-            Email
-            <input
-              {...register("email")}
-              type="email"
-              required
-              className="mt-2 w-full rounded-xl border border-[#ddd4ce] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#844D63] focus:ring-4 focus:ring-[#ead5dd]/60"
-            />
-          </label>
-
-          <label className="block text-sm font-medium text-[#4d5047]">
-            Fjalekalimi
-            <input
-              {...register("password")}
-              type="password"
-              required
-              className="mt-2 w-full rounded-xl border border-[#ddd4ce] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#844D63] focus:ring-4 focus:ring-[#ead5dd]/60"
-            />
-          </label>
-
-          <button className="mt-2 w-full rounded-full bg-[#151712] px-5 py-3.5 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-[#303326]">
+          <button className="bg-gradient-to-r from-purple-500 to-pink-400 text-white p-3 rounded-xl font-semibold hover:opacity-90 transition mt-1">
             Regjistrohu
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-[#77766d]">
+        <p className="text-center text-sm text-gray-400">
           Ke llogari?{" "}
           <Link
             to="/login"
-            className="font-semibold text-[#844D63] hover:text-[#65394b]"
+            className="text-purple-500 font-medium hover:text-purple-700"
           >
-            Hyr ketu
+            Hyr këtu
           </Link>
         </p>
       </div>
-    </main>
+    </div>
   );
 }
