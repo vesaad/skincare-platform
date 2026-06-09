@@ -21,16 +21,20 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-white/40 bg-white/55 px-4 py-3 shadow-sm shadow-black/5 backdrop-blur-2xl md:px-8">
       <div className="flex items-center gap-2">
         <Link to="/" className="flex items-center">
-          <span className="rounded-full bg-white/55 p-1.5 shadow-sm shadow-[#8b7a6d]/10 ring-1 ring-white/70 backdrop-blur-xl">
+          <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-white/70 shadow-sm shadow-[#8b7a6d]/10 ring-1 ring-white/80 backdrop-blur-xl">
             <img
               src="/images/aura-emblem-logo.png"
               alt="AuraSkin emblem"
-              className="h-12 w-12 rounded-full object-cover object-center md:h-14 md:w-14"
+              className="h-full w-full rounded-full object-cover object-center"
             />
           </span>
           <span className="ml-3 hidden leading-tight sm:block">
-            <span className="block text-base font-semibold text-[#151712]">AuraSkin</span>
-            <span className="block text-xs font-medium text-[#844D63]">Personalized Skincare</span>
+            <span className="block text-xl font-semibold text-[#151712]">
+              AuraSkin
+            </span>
+            <span className="block text-xs font-medium text-[#844D63]">
+              Personalized Skincare
+            </span>
           </span>
         </Link>
       </div>
