@@ -1,0 +1,40 @@
+# Flow për mbrojtje — kodi aktual, 23 shtator 2026
+
+## 1. Çfarë ndodh nga Submit te Login deri te hyrja në sistem?
+
+1. `frontend/src/app/main.jsx` vendos `Provider`, `PersistGate` dhe `BrowserRouter`. `frontend/src/app/app.jsx` lidh `/login` me komponentin `Login` nga `frontend/src/features/auth/login.jsx`.
+2. Te `Login`, butoni **Hyr** dërgon formën. `handleSubmit(onSubmit)` nga `useForm()` mbledh `email` dhe `password`, pastaj thërret funksionin lokal `onSubmit(data)`.
+3. `onSubmit` thërret `api.post("/auth/login", data)`. `frontend/src/shared/services/api.js` vendos baseURL `http://localhost:3001/api`: kërkesa bëhet `POST /api/auth/login`. Request interceptor shton Bearer token vetëm nëse ekziston tashmë në localStorage.
+4. `backend/src/server.js`: `express.json()` lexon trupin JSON dhe `/api/auth` e dërgon kërkesën te `backend/src/features/auth/auth.routes.js`. Route-i `/login` kalon fillimisht në `validateMiddleware(loginSchema)`.
+5. `backend/src/middleware/validate.middleware.js` ekzekuton `schema.validate(req.body, { abortEarly: false })`. `loginSchema` nga `backend/src/features/auth/auth.validator.js` kërkon email të vlefshëm dhe password. Gabimi kthen HTTP 400 me `errors`; përndryshe thirret `next()`.
+6. `backend/src/features/auth/auth.controller.js` → `login(req, res)` thërret `authService.login(req.body)` nga `backend/src/features/auth/auth.service.js`.
+7. Service `login` thërret `authRepo.findByEmail(email)`. `backend/src/features/auth/auth.repository.js` → `findByEmail` ekzekuton `prisma.user.findUnique({ where: { email } })`. Modeli `User` përcaktohet në `backend/prisma/schema.prisma`. Nëse user-i mungon, service hedh gabim; ndryshe kontrollon password-in me `bcrypt.compare(password, user.passwordHash)`.
+8. Service `login` thërret `auth.repository.js` → `findByIdWithRoles(user.id)`, që ekzekuton `prisma.user.findUnique(...)` me `userRoles.role`. Roli është `userWithRole.userRoles?.[0]?.role?.name || 'User'`. Service vendos `user.role`, pastaj `generateTokens(user)` krijon access JWT 15-minutësh dhe refresh token me `crypto.randomBytes(64)`.
+9. Service llogarit SHA-256 të refresh token-it dhe skadencën 7-ditore. `auth.repository.js` → `saveRefreshToken(user.id, tokenHash, expiresAt)` shkruan në modelin Prisma `RefreshToken`. Service kthen `{ accessToken, refreshToken, user: { id, email, firstName, role } }`.
+10. Controller `login` kthen HTTP 200 me këtë objekt. Nëse service hedh gabim, controller kthen HTTP 400 me `error`. Axios në `api.js` ia kalon përgjigjen e suksesshme `onSubmit`.
+11. `login.jsx` ekzekuton `dispatch(loginSuccess(res.data))`. Reducer-i `loginSuccess` në `frontend/src/features/auth/auth.slice.js` ruan user-in/token-at dhe vendos `isAuthenticated = true`. Pastaj `navigate("/dashboard")`; `PrivateRoute` në `app.jsx` lejon komponentin `Dashboard` nga `frontend/src/features/routines/dashboard.jsx`. Në dështim, `onSubmit` shfaq `alert("Email ose fjalëkalim i gabuar")`.
+
+## 2. Ku janë Sign In / Sign Up dhe çfarë thërrasin?
+
+1. `frontend/src/shared/components/navbar.jsx` → `Navbar`: kur `isAuthenticated` është false, shfaq **Hyr** (`Link to="/login"`) dhe **Regjistrohu** (`Link to="/register"`). Janë lidhje React Router; nuk thërrasin funksion login/register me `onClick`.
+2. `frontend/src/app/app.jsx` ngarkon `Login` për `/login` dhe `Register` për `/register`.
+3. `frontend/src/features/auth/login.jsx` → butoni **Hyr** submit-on formën dhe shkakton `handleSubmit(onSubmit)` → `onSubmit(data)` → `api.post("/auth/login", data)`.
+4. `frontend/src/features/auth/register.jsx` → butoni **Regjistrohu** shkakton `handleSubmit(onSubmit)` → `onSubmit(data)` → `api.post("/auth/register", data)` me `firstName`, `lastName`, `email`, `password`. Suksesi bën `navigate("/login")`; nuk kryen login automatik. Lidhja **Hyr këtu** në fund të së njëjtës faqe hap gjithashtu `/login`.
+
+## 3. Ku ruhen token-at dhe si përdoren më pas?
+
+1. `auth.slice.js` → `loginSuccess`: access token ruhet në Redux `state.auth.token` dhe localStorage me çelësin `token`; refresh token në `state.auth.refreshToken` dhe localStorage me çelësin `refreshToken`. Ky flow nuk vendos auth cookies.
+2. `frontend/src/app/store.js` përdor `persistReducer` me `{ key: "auth", storage }`. Adapteri `storage` përdor localStorage, kështu që auth state ruhet edhe nën çelësin e redux-persist `persist:auth`. `PersistGate` në `main.jsx` pret rikthimin e state-it gjatë hapjes së aplikacionit.
+3. `frontend/src/shared/services/api.js` → request interceptor lexon `localStorage.getItem("token")` dhe vendos `Authorization: Bearer <token>`. `backend/src/middleware/auth.middleware.js` → `authMiddleware` verifikon JWT me `jwt.verify(..., process.env.JWT_SECRET)` dhe vendos payload-in te `req.user`.
+4. Në një HTTP 401, response interceptor i `api.js` lexon refresh token-in, vendos `_retry = true` dhe dërgon `POST /api/auth/refresh` me `{ refreshToken }`. `auth.routes.js` → controller `refresh` → service `refresh` → repository `findRefreshToken` kontrollojnë hash-in, revokimin dhe skadencën; service lexon user-in përmes `auth.repository.js` → `findById(saved.userId)`, pastaj thërret `generateTokens`, `revokeRefreshToken` dhe `saveRefreshToken`.
+5. Interceptor-i merr token-at e rinj, thërret `store.dispatch(updateTokens(res.data))` nga `auth.slice.js`, përditëson header-in dhe riprovon kërkesën origjinale. Nëse refresh dështon, thërret `logout()`; reducer-i pastron token-at dhe auth state.
+6. `frontend/src/features/admin/admin.service.js` ka Axios client të veçantë: shton Bearer token nga localStorage, por nuk ka interceptor për refresh automatik. `Navbar.handleLogout()` thërret vetëm Redux `logout()` dhe `navigate("/login")`; nuk dërgon kërkesë te endpoint-i backend `/auth/logout`.
+
+## 4. Si ndahet Admin nga User?
+
+1. Në regjistrim, `backend/src/features/auth/auth.service.js` → `register` thërret `auth.repository.js` → `findRoleByName('User')`; nëse roli ekziston, `assignRoleToUser(user.id, userRole.id)` krijon `UserRole`. Modelet `User`, `Role`, `UserRole` janë në `backend/prisma/schema.prisma`.
+2. Në login, service lexon `userRoles.role`, merr rolin e parë ose fallback `User`, dhe e vendos si te `user.role` i përgjigjes, ashtu edhe te claim `role` në access JWT përmes `generateTokens`.
+3. Në backend, `backend/src/middleware/auth.middleware.js` vendos `req.user` nga JWT. `backend/src/middleware/role.middleware.js` → `roleMiddleware(...roles)` kontrollon `roles.includes(req.user.role)`; pa user kthen 401 dhe pa rol të lejuar 403. `features/admin/admin.routes.js` aplikon `authMiddleware` dhe `roleMiddleware('Admin')` për të gjitha endpoints admin. Routes products mbrojnë POST/PUT/DELETE; routes brands/categories/ingredients mbrojnë POST. GET-et publike të këtyre katalogëve mbeten publike.
+4. Në frontend, `auth.slice.js` ruan `state.auth.user.role`. `Navbar` shfaq **Admin Panel** vetëm kur `user?.role === 'Admin'` (lidhja fshihet nga CSS në ekrane të vogla). `app.jsx` → `AdminRoute` kërkon autentikim dhe rolin Admin; përndryshe ridrejton te `/login` ose `/`. Admin hap dashboard/users/products; `PrivateRoute` lejon quiz/routine/dashboard për çdo user të autentikuar. Edhe Admin pas login-it shkon fillimisht te `/dashboard`.
+5. Ndryshimi i rolit: `PUT /api/admin/users/:id/role` → `features/admin/admin.routes.js` → `admin-user.controller.js: assignRole` → `admin-user.service.js: assignRole` → `admin-user.repository.js: deleteRoles` dhe `createRole`. Repository fshin lidhjet ekzistuese `UserRole` dhe krijon lidhjen me `roleId` të kërkesës. Frontend `admin.service.js` eksporton `assignRole`, por `users-page.jsx` nuk e importon dhe nuk shfaq buton për ndryshim roli. Ndryshimi në DB nuk rifreskon vetë JWT-të apo Redux state-in tashmë të lëshuar.
+6. Kufizime reale të këtij flow: `auth.service.js` → `refresh` lexon vetëm `User`, pa `userRoles` dhe pa caktuar `user.role`; prandaj JWT-ja e re nuk merr rolin si në login, ndërsa Redux `user.role` mbetet i vjetri. `login` dhe `authMiddleware` nuk kontrollojnë `isActive`, megjithëse admin ka `toggleStatus`. Këto sjellje ekzistojnë në kodin aktual dhe nuk janë korrigjuar në këtë dokumentim.

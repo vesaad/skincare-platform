@@ -12,7 +12,7 @@ import pandas as pd
 
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BASE_DIR / "model.pkl"
-CSV_PATH = BASE_DIR / "skincare_100.csv"
+CSV_PATH = BASE_DIR.parent / "data" / "skincare_100.csv"
 
 ROUTINE_STEPS: dict[str, list[tuple[str, str]]] = {
     "Acne Routine": [
