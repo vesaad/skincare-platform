@@ -9,7 +9,6 @@ const Register = lazy(() => import("../features/auth/register"));
 const ProductExplorer = lazy(() => import("../features/products/product-explorer"));
 const Quiz = lazy(() => import("../features/assessment/quiz"));
 const Routine = lazy(() => import("../features/routines/routine"));
-const Dashboard = lazy(() => import("../features/routines/dashboard"));
 const AdminLayout = lazy(() => import("../features/admin/admin-layout"));
 const AdminDashboard = lazy(() => import("../features/admin/dashboard"));
 const UsersPage = lazy(() => import("../features/admin/users-page"));
@@ -42,7 +41,6 @@ export default function App() {
       <Route path="/products" element={<><Navbar /><S><ProductExplorer /></S></>} />
       <Route path="/quiz" element={<PrivateRoute><><Navbar /><S><Quiz /></S></></PrivateRoute>} />
       <Route path="/routine" element={<PrivateRoute><><Navbar /><S><Routine /></S></></PrivateRoute>} />
-      <Route path="/dashboard" element={<PrivateRoute><><Navbar /><S><Dashboard /></S></></PrivateRoute>} />
 
       <Route path="/admin" element={
         <AdminRoute>

@@ -121,12 +121,6 @@ add('routines/routine.controller.js', 'saveRoutine', { body: routine, expectedSt
 for (const body of [{}, { routineType: 'x', products: [] }, { routineType: 'x', products: 'bad' }]) add('routines/routine.controller.js', 'saveRoutine', { body, expectedStatus: 400 });
 for (const failAt of [1, 2]) add('routines/routine.controller.js', 'saveRoutine', { body: routine, failAt, expectedStatus: 400 });
 for (const options of [{}, { noRoutine: true }, { failAt: 1, expectedStatus: 500 }]) add('routines/routine.controller.js', 'getActiveRoutine', options);
-for (const options of [
-  { body: { routineId: '9', rating: '4', notes: 'Good' }, expectedStatus: 201 },
-  { body: { routineId: '9', rating: null, notes: '' }, expectedStatus: 201 },
-  { body: {}, expectedStatus: 400 },
-  { body: { routineId: '9' }, failAt: 1, expectedStatus: 400 },
-]) add('progress/progress.controller.js', 'createProgressLog', { oldFile: 'routines/progress.controller.js', ...options });
 for (const Age of ['18–24', '25-34', '55+', '31', 40]) add('assessment/assessment.controller.js', 'assess', { body: { Age, Acne_Severity: '2', Skin_Type: 'Dry' } });
 for (const options of [
   { mlError: { detail: 'Invalid input' }, expectedStatus: 422 },

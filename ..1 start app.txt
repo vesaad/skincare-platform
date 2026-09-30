@@ -1,0 +1,15 @@
+# Terminal 1 — ML Service
+cd ~/Desktop/skincare-platform/ml-service
+uvicorn main:app --reload --port 8000
+
+# Terminal 2 — Backend
+cd ~/Desktop/skincare-platform/backend
+npm run dev
+
+# Terminal 3 — Frontend
+cd ~/Desktop/skincare-platform
+npm run dev
+
+# Terminal 4 — (opsional) Prisma Studio
+cd ~/Desktop/skincare-platform/backend
+npx prisma studio

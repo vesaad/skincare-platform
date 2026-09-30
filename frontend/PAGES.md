@@ -10,7 +10,6 @@ File-t janë relative ndaj `frontend/src/`. Burimi: `app/app.jsx`.
 | `/products` | `features/products/product-explorer.jsx` | Shfaq, kërkon dhe filtron produkte | Publike |
 | `/quiz` | `features/assessment/quiz.jsx` | Mbledh përgjigje për rekomandimin personal | Kërkon login |
 | `/routine` | `features/routines/routine.jsx` | Shfaq dhe ruan rutinën e rekomanduar | Kërkon login |
-| `/dashboard` | `features/routines/dashboard.jsx` | Shfaq rutinën aktive dhe regjistron progres | Kërkon login |
 | `/admin` (prind) | `features/admin/admin-layout.jsx` | Përmban navigimin dhe faqet administrative | Vetëm Admin |
 | `/admin` (index) | `features/admin/dashboard.jsx` | Shfaq statistikat e panelit administrativ | Vetëm Admin |
 | `/admin/users` | `features/admin/users-page.jsx` | Menaxhon përdoruesit dhe eksporton listën | Vetëm Admin |

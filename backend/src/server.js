@@ -57,10 +57,6 @@ app.use(
   "/api/routines",
   require("./features/routines/routine.routes.js")
 );
-app.use(
-  "/api/progress-logs",
-  require("./features/progress/progress.routes.js")
-);
 
 // Protected test route
 app.get("/api/protected", authMiddleware, (req, res) => {

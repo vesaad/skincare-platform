@@ -23,7 +23,6 @@ const findActive = (userId) => prisma.routine.findFirst({
       include: { product: true },
       orderBy: { stepOrder: 'asc' },
     },
-    progressLogs: { orderBy: { loggedAt: 'desc' }, take: 10 },
   },
   orderBy: { generatedAt: 'desc' },
 });

@@ -48,7 +48,7 @@ export default function Navbar() {
           Produkte
         </Link>
         <Link
-          to="/quiz"
+          to="/quiz?retake=1"
           className={`rounded-full border border-white/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide shadow-sm backdrop-blur transition md:text-sm ${isActive("/quiz") ? "bg-[#151712] text-white" : "bg-[#151712]/90 text-white hover:bg-[#303326]"}`}
         >
           Take Quiz
@@ -62,13 +62,6 @@ export default function Navbar() {
             >
               Rutina
             </Link>
-            <Link
-              to="/dashboard"
-              className={`hidden rounded-full px-4 py-2 text-sm font-medium transition lg:inline-flex ${isActive("/dashboard") ? "bg-white/80 text-[#151712] shadow-sm" : "text-gray-500 hover:bg-white/70 hover:text-gray-900"}`}
-            >
-              Dashboard
-            </Link>
-
             {user?.role === 'Admin' && (
               <Link
                 to="/admin"

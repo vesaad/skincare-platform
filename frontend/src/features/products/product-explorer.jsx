@@ -199,7 +199,9 @@ export default function ProductExplorer() {
                   Showing
                 </p>
                 <p className="mt-2 text-3xl font-semibold">
-                  {list.length} / {total}
+                  {list.length > 0
+                    ? `${(page - 1) * pageSize + 1}–${Math.min((page - 1) * pageSize + list.length, total)}`
+                    : "0"} nga {total}
                 </p>
                 <p className="mt-1 text-sm text-[#8b8a7f]">products found</p>
               </div>

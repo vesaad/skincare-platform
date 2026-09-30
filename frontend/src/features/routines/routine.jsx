@@ -188,38 +188,12 @@ function ProductStepCard({ product }) {
   );
 }
 
-function MiniProductCard({ product }) {
-  return (
-    <div className="rounded-[1.5rem] border border-white/70 bg-white/55 p-4 backdrop-blur-xl">
-      <div className="flex items-center gap-3">
-        <img
-          src={`/images/products/${product.product_id}.jpg`}
-          alt={product.name}
-          className="h-16 w-16 rounded-2xl bg-[#fbf8f4] object-contain p-2"
-          onError={(e) => { e.target.style.display = 'none'; }}
-        />
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#844D63]">
-            {product.step}
-          </p>
-          <p className="truncate text-sm font-semibold text-[#151712]">
-            {product.name}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Routine() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data, savedRoutineId, profile } = useSelector((s) => s.routine);
   const [activeRoutine, setActiveRoutine] = useState(null);
   const [loadingRoutine, setLoadingRoutine] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const loadActiveRoutine = async () => {
@@ -294,28 +268,6 @@ export default function Routine() {
     );
   }
 
-  const handleSave = async () => {
-    if (activeRoutine || savedRoutineId || data?.routineId) {
-      setSaved(true);
-      return;
-    }
-
-    setSaving(true);
-    setError(null);
-    try {
-      const res = await api.post("/routines", {
-        routineType: routineData.routine,
-        products: routineData.products,
-      });
-      dispatch(setSavedRoutineId(res.data.id));
-      setSaved(true);
-    } catch (err) {
-      setError(err.response?.data?.error || "Could not save routine");
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const products = routineData.products || [];
   const routineName = routineData.routine?.replace(" Routine", "") || "Personalized";
   const confidence = Math.round(routineData.confidence || 0);
@@ -329,12 +281,12 @@ export default function Routine() {
       <section className="relative px-4 py-10 md:px-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(132,77,99,0.14),transparent_30%),radial-gradient(circle_at_92%_12%,rgba(184,146,95,0.18),transparent_30%),linear-gradient(135deg,#fbf8f4_0%,#f7f3ec_55%,#efe7df_100%)]" />
         <div className="relative mx-auto max-w-7xl">
-          <div className="grid gap-6 lg:grid-cols-[0.92fr_0.58fr]">
+          <div className="grid gap-6 lg:grid-cols-[1fr_240px] lg:items-start">
             <div className="rounded-[3rem] border border-white/70 bg-white/45 p-6 shadow-2xl shadow-[#8b7a6d]/15 backdrop-blur-2xl md:p-10">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#844D63]">
                 Your personalized plan
               </p>
-              <div className="mt-5 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+              <div className="mt-5">
                 <div>
                   <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
                     {routineName} Routine
@@ -344,17 +296,9 @@ export default function Routine() {
                     into simple steps you can actually follow.
                   </p>
                 </div>
-                <div className="rounded-[2rem] border border-white/75 bg-white/55 p-5 text-center shadow-sm backdrop-blur-xl">
-                  <p className="text-5xl font-semibold text-[#844D63]">
-                    {confidence}%
-                  </p>
-                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#8b8a7f]">
-                    Match confidence
-                  </p>
-                </div>
               </div>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-[1.5rem] bg-white/60 p-4 ring-1 ring-white/80">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#844D63]">
                     Products
@@ -375,58 +319,42 @@ export default function Routine() {
                     {profile?.Skin_Type || "Personal"}
                   </p>
                 </div>
-              </div>
-            </div>
-
-            <aside className="rounded-[3rem] border border-white/70 bg-white/35 p-6 shadow-xl shadow-black/5 backdrop-blur-2xl md:p-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#844D63]">
-                Routine preview
-              </p>
-              <div className="mt-5 space-y-3">
-                {products.slice(0, 3).map((product) => (
-                  <MiniProductCard
-                    key={`${product.step}-${product.product_id}-mini`}
-                    product={product}
-                  />
-                ))}
-              </div>
-              <div className="mt-6 rounded-[2rem] bg-[#151712]/90 p-5 text-white shadow-xl shadow-black/10">
-                <p className="text-sm font-semibold">Why this routine?</p>
-                <p className="mt-2 text-sm leading-6 text-white/75">
-                  Because your quiz profile points to {routineName.toLowerCase()}
-                  -focused support with products ordered by routine step.
-                </p>
-              </div>
-            </aside>
-          </div>
-
-          <div className="mt-8 grid gap-6 lg:grid-cols-[0.22fr_1fr]">
-            <div className="hidden lg:block">
-              <div className="sticky top-32 rounded-[2rem] border border-white/70 bg-white/40 p-5 shadow-sm backdrop-blur-2xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#844D63]">
-                  Steps
-                </p>
-                <div className="mt-5 space-y-4">
-                  {products.map((product, index) => (
-                    <div key={`${product.step}-nav`} className="flex gap-3">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#ead5dd] text-xs font-bold text-[#844D63]">
-                        {index + 1}
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold text-[#151712]">
-                          {product.step}
-                        </p>
-                        <p className="text-xs text-[#8b8a7f]">
-                          {product.brand}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="rounded-[1.5rem] bg-white/60 p-4 ring-1 ring-white/80">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#844D63]">
+                    Match confidence
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-[#844D63]">
+                    {confidence}%
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div>
+            <aside className="w-full rounded-[2rem] border border-white/75 bg-white/55 p-5 shadow-xl shadow-black/5 backdrop-blur-xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#844D63]">
+                Steps
+              </p>
+              <div className="mt-5 space-y-4">
+                {products.map((product, index) => (
+                  <div key={`${product.step}-nav`} className="flex gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#ead5dd] text-xs font-bold text-[#844D63]">
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-[#151712]">
+                        {product.step}
+                      </p>
+                      <p className="text-xs text-[#8b8a7f]">
+                        {product.brand}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </aside>
+          </div>
+
+          <div className="mt-8">
               <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#844D63]">
@@ -450,37 +378,8 @@ export default function Routine() {
                   <ProductStepCard key={`${p.step}-${p.product_id}`} product={p} />
                 ))}
               </div>
-            </div>
           </div>
 
-          {error && (
-            <p className="mt-5 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
-              {error}
-            </p>
-          )}
-
-          <div className="mt-8 rounded-[2.5rem] border border-white/70 bg-white/45 p-5 shadow-xl shadow-black/5 backdrop-blur-2xl md:p-6">
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving || saved || !!savedRoutineId}
-                className="flex-1 rounded-full bg-[#151712]/90 px-6 py-4 text-sm font-semibold uppercase tracking-wide text-white shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:bg-[#303326] disabled:opacity-50"
-              >
-                {saved || savedRoutineId
-                  ? "Routine saved"
-                  : saving
-                    ? "Saving..."
-                    : "Save routine"}
-              </button>
-              <Link
-                to="/dashboard"
-                className="flex-1 rounded-full border border-white/80 bg-white/65 px-6 py-4 text-center text-sm font-semibold uppercase tracking-wide text-[#844D63] shadow-sm transition hover:bg-white"
-              >
-                View dashboard
-              </Link>
-            </div>
-          </div>
         </div>
       </section>
     </main>
